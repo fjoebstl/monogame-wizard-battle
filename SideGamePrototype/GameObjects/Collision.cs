@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 
 namespace SideGamePrototype
 {
     public interface ICollision
     {
-        bool Move(ref Vector2 pos, ref Vector2 vel, ref Vector2 acc, Tile t);
-
+        bool Move(ref Vector2 pos, Vector2 newPos, Tile t);
         bool StandsOnGround(Rectangle boundingBox);
     }
 
@@ -25,27 +21,23 @@ namespace SideGamePrototype
 
         public bool StandsOnGround(Rectangle boundingBox)
         {
+            //Check X--X--X bottom points of rectangle
+
             var p = new Vector2(boundingBox.Center.X, boundingBox.Bottom);
             var p2 = new Vector2(boundingBox.X, boundingBox.Bottom);
             var p3 = new Vector2(boundingBox.Right, boundingBox.Bottom);
+
             return IsNotPassable(p) || IsNotPassable(p2) || IsNotPassable(p3);
         }
 
         private bool IsNotPassable(Vector2 p)
-        {
-            var t = GetTileAt(p);
-            return t != ' ';
-        }
+            => GetTileAt(p) != ' ';
 
         private char GetTileAt(Vector2 p)
-        {
-            return this.map.Data[(int)(p.X / 16), (int)(p.Y / 16)];
-        }
+            => this.map.Data[(int)(p.X / 16), (int)(p.Y / 16)];
 
         public bool Collides(IEnumerable<Vector2> solidPixels)
-        {
-            return solidPixels.Any(p => IsNotPassable(p));
-        }
+            => solidPixels.Any(p => IsNotPassable(p));
 
         public bool Collides(IEnumerable<Vector2> solidPixels, out Vector2 ct)
         {
@@ -53,9 +45,8 @@ namespace SideGamePrototype
             return ct != default(Vector2);
         }
 
-        public bool Move(ref Vector2 pos, ref Vector2 vel, ref Vector2 acc, Tile t)
+        public bool Move(ref Vector2 pos, Vector2 newPos, Tile t)
         {
-            var newPos = pos + vel;
             var pixels = t.GetSolidPoints();
             bool collided = false;
 
@@ -80,12 +71,6 @@ namespace SideGamePrototype
                     return true;
                 }
             }
-
-            /* if (collided)
-             {
-                 vel.X *= -1;
-                 vel.Y *= -1;
-             }*/
 
             pos = newPos;
 

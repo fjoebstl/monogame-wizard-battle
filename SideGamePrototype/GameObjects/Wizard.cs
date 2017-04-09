@@ -84,7 +84,7 @@ namespace SideGamePrototype
             Debug.WriteLine(vel);
 
             var totalVel = this.vel + horizontalVel;
-            if (this.collision.Move(ref this.pos, ref totalVel, ref this.acc, this.GetTile()))
+            if (this.collision.Move(ref this.pos, this.pos + totalVel, this.GetTile()))
             {
                 this.acc = new Vector2();
                 this.vel = new Vector2();
@@ -97,20 +97,6 @@ namespace SideGamePrototype
             vel.Y = vel.Y < -limit || vel.Y > limit ? limit * Math.Sign(vel.Y) : vel.Y;
 
             return vel;
-        }
-
-        private void UpdateGravity()
-        {
-            /*if (!this.collision.StandsOnGround(this.BoundingBox) && this.state != State.Jumping)
-            {
-                this.state = State.Falling;
-                this.acc = new Vector2(0, 3);
-            }
-            else
-            {
-                this.state = State.Standing;
-                this.acc = new Vector2(0, 0);
-            }*/
         }
 
         public void Draw(SpriteBatch s)

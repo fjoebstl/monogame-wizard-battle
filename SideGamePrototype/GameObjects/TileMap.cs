@@ -35,10 +35,12 @@ namespace SideGamePrototype
             => s.Draw(
                 texture: this.t,
                 destinationRectangle: destination,
-                sourceRectangle: this.r,
+                sourceRectangle: r,
                 color: Color.White,
-                rotation: 0.0f, origin: new Vector2(),
-                effects: eff);
+                rotation: 0.0f,
+                origin: new Vector2(),
+                effects: eff,
+                layerDepth: 1.0f);
 
         public List<Vector2> GetSolidPoints()
         {
