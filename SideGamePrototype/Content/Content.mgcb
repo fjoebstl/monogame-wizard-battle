@@ -13,3 +13,9 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin Background.png
+/copy:Background.png
+
+#begin Resources.png
+/copy:Resources.png
+
