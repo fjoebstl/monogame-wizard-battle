@@ -80,9 +80,6 @@ namespace SideGamePrototype
             this.vel += Limit(this.acc, 3);
             this.vel = Limit(this.vel, 5);
 
-            Debug.WriteLine(acc);
-            Debug.WriteLine(vel);
-
             var totalVel = this.vel + horizontalVel;
             if (this.collision.Move(ref this.pos, this.pos + totalVel, this.GetTile()))
             {

@@ -26,9 +26,11 @@ namespace SideGamePrototype
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
+            //init game resources
             R.Init(graphics, Content, this.Window.Handle);
             R.System.ToWindow();
 
+            //create game map + player
             var map = GameMapReader.FromFile(@"Content/Game.txt");
             this.mapRenderer = new GameMapRenderer(map);
             var collision = new Collision(map);
@@ -57,10 +59,12 @@ namespace SideGamePrototype
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
+            //Background
             this.spriteBatch.Begin();
             this.spriteBatch.Draw(R.Textures.Background, new Vector2(0, 0), Color.White);
             this.spriteBatch.End();
 
+            //Foreground
             this.spriteBatch.Begin();
             this.mapRenderer.Draw(this.spriteBatch);
             this.entityList.ForEach(e => e.Draw(this.spriteBatch));

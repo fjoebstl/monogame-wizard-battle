@@ -32,6 +32,7 @@ namespace Resources
             public readonly TileMap Tiles;
 
             private Texture2D tileTexture;
+            private Dictionary<Texture2D, Color[]> cachedPixelData = new Dictionary<Texture2D, Color[]>();
 
             public T(GraphicsDevice d, ContentManager c)
             {
@@ -39,6 +40,16 @@ namespace Resources
                 this.Background = c.Load<Texture2D>("Background");
                 this.tileTexture = c.Load<Texture2D>("Resources");
                 this.Tiles = new TileMap(tileTexture);
+            }
+
+            public Color[] GetPixels(Texture2D t)
+            {
+                if (!this.cachedPixelData.ContainsKey(t))
+                {
+                    this.cachedPixelData[t] = t.GetPixels();
+                }
+
+                return this.cachedPixelData[t];
             }
 
             public void Dispose()

@@ -23,11 +23,11 @@ namespace SideGamePrototype
         {
             //Check X--X--X bottom points of rectangle
 
-            var p = new Vector2(boundingBox.Center.X, boundingBox.Bottom);
-            var p2 = new Vector2(boundingBox.X, boundingBox.Bottom);
-            var p3 = new Vector2(boundingBox.Right, boundingBox.Bottom);
+            var bottomCenter = new Vector2(boundingBox.Center.X, boundingBox.Bottom);
+            var bottomLeft = new Vector2(boundingBox.X, boundingBox.Bottom);
+            var bottomRight = new Vector2(boundingBox.Right, boundingBox.Bottom);
 
-            return IsNotPassable(p) || IsNotPassable(p2) || IsNotPassable(p3);
+            return IsNotPassable(bottomCenter) || IsNotPassable(bottomLeft) || IsNotPassable(bottomRight);
         }
 
         private bool IsNotPassable(Vector2 p)
@@ -50,23 +50,30 @@ namespace SideGamePrototype
             var pixels = t.GetSolidPoints();
             bool collided = false;
 
-            //Free if stuck
+            //Free if stuck:
+            //if pos is a collition before moving try to "push" objectCenter
+            //away from collition
             Vector2 ct;
             while (Collides(Translate(pixels, pos), out ct))
             {
-                pos += (pos + new Vector2(8, 8)) - ct;
+                var objectCenter = pos + t.Size;
+                pos += objectCenter - ct;
                 return true;
             }
 
-            //Move iteration
+            //Move iteration:
+            //If newPos would result in an collision binary search for position
+            //between pos <--> newPos.
+            //break binary search after maxIterations
             int iterations = 0;
+            int maxIterations = 4;
             while (Collides(Translate(pixels, newPos)))
             {
                 collided = true;
                 newPos = (pos + newPos) / 2;
                 iterations++;
 
-                if (iterations > 4)
+                if (iterations > maxIterations)
                 {
                     return true;
                 }

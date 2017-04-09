@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Resources;
 using System.Collections.Generic;
 
 namespace SideGamePrototype
@@ -8,6 +9,8 @@ namespace SideGamePrototype
     {
         private readonly Texture2D t;
         private readonly Rectangle r;
+
+        public Vector2 Size => new Vector2(r.Width, r.Height);
 
         public Tile(Texture2D t, Rectangle r)
         {
@@ -44,10 +47,10 @@ namespace SideGamePrototype
 
         public List<Vector2> GetSolidPoints()
         {
-            var l = new List<Vector2>();
+            //Get all pixels of image which are not fully transparent
 
-            //Very inefficient :( should be cached somewhere
-            var raw = t.GetPixels();
+            var l = new List<Vector2>();
+            var raw = R.Textures.GetPixels(this.t);
 
             for (int x = 0; x < this.r.Width; x++)
             {
@@ -65,21 +68,6 @@ namespace SideGamePrototype
         }
     }
 
-    public static class Texture2dHelper
-    {
-        public static Color GetPixel(this Color[] colors, int x, int y, int width)
-        {
-            return colors[x + (y * width)];
-        }
-
-        public static Color[] GetPixels(this Texture2D texture)
-        {
-            Color[] colors1D = new Color[texture.Width * texture.Height];
-            texture.GetData<Color>(colors1D);
-            return colors1D;
-        }
-    }
-
     public class TileMap
     {
         private static readonly int tileSize = 16;
@@ -88,6 +76,8 @@ namespace SideGamePrototype
 
         private Dictionary<char, string> tileMapping = new Dictionary<char, string>()
         {
+            //See Content\Game.txt for map characters
+            //See Content\Resources.pdn (Paint.net) for texture coordinates
             { '#', "1,B" },
             { '(', "1,A" },
             { ')', "1,C" },
