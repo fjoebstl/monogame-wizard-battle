@@ -37,8 +37,8 @@ namespace Resources
             public T(GraphicsDevice d, ContentManager c)
             {
                 c.RootDirectory = "./Content";
-                this.Background = c.Load<Texture2D>("Background");
-                this.tileTexture = c.Load<Texture2D>("Resources");
+                this.Background = c.Load<Texture2D>("Background.png");
+                this.tileTexture = c.Load<Texture2D>("Resources.png");
                 this.Tiles = new TileMap(tileTexture);
             }
 

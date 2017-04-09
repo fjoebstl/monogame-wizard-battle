@@ -14,12 +14,8 @@
 #---------------------------------- Content ---------------------------------#
 
 #begin Background.png
-/importer:
-/processor:
-/build:Background.png
+/copy:Background.png
 
 #begin Resources.png
-/importer:
-/processor:
-/build:Resources.png
+/copy:Resources.png
 
