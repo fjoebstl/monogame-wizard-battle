@@ -5,6 +5,11 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SideGamePrototype", "SideGamePrototype\SideGamePrototype.csproj", "{79FE9386-C45B-4D0F-BB25-E1DF2EF99C41}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7CB5D5B5-8A68-42DA-A0AF-054CA4F775D8}"
+	ProjectSection(SolutionItems) = preProject
+		Readme.txt = Readme.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
