@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using Resources;
 using System.Collections.Generic;
 
@@ -16,7 +15,6 @@ namespace SideGamePrototype
         public SideGameProto()
         {
             graphics = new GraphicsDeviceManager(this);
-            Content.RootDirectory = "Content";
         }
 
         protected override void Initialize()
