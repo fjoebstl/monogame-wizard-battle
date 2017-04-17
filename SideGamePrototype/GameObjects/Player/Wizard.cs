@@ -18,19 +18,25 @@ namespace SideGamePrototype
             var walkingState = new WalkingState(body, input);
             var fallingState = new FallingState(body, input);
             var jumpingState = new JumpingState(body, input);
+            var diveState = new DiveDownState(body, input);
 
             //Triggers
             var onGround = new BasicTrigger(() => collision.StandsOnGround(this.body.BoundingBox));
             var notOnGround = new BasicTrigger(() => !collision.StandsOnGround(this.body.BoundingBox));
             var jumpReady = CombinedTrigger.And(new DelayTrigger(0.2f), new BasicTrigger(() => input.JumpPressed));
             var notJumpPressed = new BasicTrigger(() => !input.JumpPressed);
+            var downPressed = new BasicTrigger(() => input.CrouchPressed);
             var jumpEnds = CombinedTrigger.Or(new DelayTrigger(0.3f), notJumpPressed);
 
             walkingState.Add(notOnGround, () => fallingState);
             walkingState.Add(jumpReady, () => jumpingState);
 
             fallingState.Add(onGround, () => walkingState);
+            fallingState.Add(downPressed, () => diveState);
+
             jumpingState.Add(jumpEnds, () => fallingState);
+
+            diveState.Add(onGround, () => walkingState);
 
             this.currentState = walkingState;
         }
@@ -125,6 +131,25 @@ namespace SideGamePrototype
 
         protected override string GetTileString()
             => "3,C";
+    }
+
+    internal class DiveDownState : DrawableState
+    {
+        public DiveDownState(IRigidBody body, IInputHandler input)
+            : base(body, input)
+        {
+        }
+
+        public override State Update(float gt)
+        {
+            this.body.AddForce("g", new Vector2(0, 3.5f));
+            this.body.AddVelocityComponent("downforce", new Vector2(0, 3));
+
+            return base.Update(gt);
+        }
+
+        protected override string GetTileString()
+            => "3,E";
     }
 
     internal abstract class DrawableState : State
