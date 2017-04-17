@@ -3,10 +3,6 @@ using Microsoft.Xna.Framework.Graphics;
 using Resources;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SideGamePrototype
 {
@@ -74,6 +70,7 @@ namespace SideGamePrototype
             if (this.input.JumpPressed && onground)
             {
                 this.acc = new Vector2(0, -0.65f);
+                this.jumpcount++;
                 this.state = State.Jumping;
             }
 
@@ -81,12 +78,16 @@ namespace SideGamePrototype
             this.vel = Limit(this.vel, 5);
 
             var totalVel = this.vel + horizontalVel;
-            if (this.collision.Move(ref this.pos, this.pos + totalVel, this.GetTile()))
+            this.WasColl = this.collision.Move(ref this.pos, this.pos + totalVel, this.GetTile());
+            if (this.WasColl)
             {
                 this.acc = new Vector2();
                 this.vel = new Vector2();
             }
         }
+
+        private bool WasColl;
+        private int jumpcount = 0;
 
         private Vector2 Limit(Vector2 vel, int limit)
         {
@@ -96,10 +97,27 @@ namespace SideGamePrototype
             return vel;
         }
 
+        private bool DEBUG = true;
         public void Draw(SpriteBatch s)
         {
             var t = GetTile();
             t.Draw(s, this.pos, !lastDirLeft ? SpriteEffects.FlipHorizontally : SpriteEffects.None);
+
+            if (DEBUG)
+            {
+                var onground = this.collision.StandsOnGround(this.BoundingBox);
+                if (onground)
+                {
+                    s.Draw(R.Textures.Red, new Rectangle(this.BoundingBox.X, this.BoundingBox.Bottom - 2, this.BoundingBox.Width, 4), Color.White);
+                }
+                //var coll = this.collision.Move(ref this.pos, this.pos, this.GetTile());
+                if (WasColl)
+                {
+                    var b = this.BoundingBox;
+                    //b.Inflate(-4, -4);
+                    s.Draw(R.Textures.Red, b, Color.White);
+                }
+            }
         }
 
         private Tile GetTile()

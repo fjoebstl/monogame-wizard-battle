@@ -53,11 +53,11 @@ namespace SideGamePrototype
             //Free if stuck:
             //if pos is a collition before moving try to "push" objectCenter
             //away from collition
-            Vector2 ct;
-            while (Collides(Translate(pixels, pos), out ct))
+            Vector2 collisionPoint;
+            if (Collides(Translate(pixels, pos), out collisionPoint))
             {
-                var objectCenter = pos + t.Size;
-                pos += objectCenter - ct;
+                var objectCenter = pos + t.Size / 2;
+                pos += objectCenter - collisionPoint;
                 return true;
             }
 
