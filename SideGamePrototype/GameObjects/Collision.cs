@@ -6,7 +6,7 @@ namespace SideGamePrototype
 {
     public interface ICollision
     {
-        bool Move(ref Vector2 pos, Vector2 newPos, Tile t);
+        bool Move(ref Vector2 pos, Vector2 newPos, PixelShape t);
         bool StandsOnGround(Rectangle boundingBox);
     }
 
@@ -45,9 +45,9 @@ namespace SideGamePrototype
             return ct != default(Vector2);
         }
 
-        public bool Move(ref Vector2 pos, Vector2 newPos, Tile t)
+        public bool Move(ref Vector2 pos, Vector2 newPos, PixelShape shape)
         {
-            var pixels = t.GetSolidPoints();
+            var pixels = shape.SolidPixels.ToList();
             bool collided = false;
 
             //Free if stuck:
@@ -56,7 +56,7 @@ namespace SideGamePrototype
             Vector2 collisionPoint;
             if (Collides(Translate(pixels, pos), out collisionPoint))
             {
-                var objectCenter = pos + t.Size / 2;
+                var objectCenter = pos + shape.Size / 2;
                 pos += objectCenter - collisionPoint;
                 return true;
             }

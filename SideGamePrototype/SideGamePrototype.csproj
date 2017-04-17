@@ -42,9 +42,11 @@
     <Compile Include="GameObjects\GameMap.cs" />
     <Compile Include="GameObjects\IEntity.cs" />
     <Compile Include="GameObjects\InputHandler.cs" />
+    <Compile Include="GameObjects\Player\RigidBody.cs" />
     <Compile Include="GameObjects\Player\State.cs" />
     <Compile Include="GameObjects\Player\Triggers.cs" />
     <Compile Include="GameObjects\Player\Wizard.cs" />
+    <Compile Include="GameObjects\Player\Wizard2.cs" />
     <Compile Include="GameResources\Texture2dHelper.cs" />
     <Compile Include="SideGameProto.cs" />
     <Compile Include="Program.cs" />

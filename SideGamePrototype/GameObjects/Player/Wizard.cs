@@ -78,7 +78,7 @@ namespace SideGamePrototype
             this.vel = Limit(this.vel, 5);
 
             var totalVel = this.vel + horizontalVel;
-            this.WasColl = this.collision.Move(ref this.pos, this.pos + totalVel, this.GetTile());
+            //this.WasColl = this.collision.Move(ref this.pos, this.pos + totalVel, this.GetTile());
             if (this.WasColl)
             {
                 this.acc = new Vector2();

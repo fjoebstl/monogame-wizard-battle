@@ -35,7 +35,7 @@ namespace SideGamePrototype
             this.mapRenderer = new GameMapRenderer(map);
             var collision = new Collision(map);
 
-            this.entityList.Add(new Wizard(
+            this.entityList.Add(new Wizard2(
                 pos: new Vector2(100, 100),
                 input: new KeyboardLayout1InputHandler(),
                 collision: collision));
