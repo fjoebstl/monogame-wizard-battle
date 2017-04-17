@@ -7,7 +7,7 @@ namespace SideGamePrototype
     internal class Wizard : IEntity
     {
         private DrawableState currentState;
-        private RigidBody body;
+        private IRigidBody body;
 
         public Wizard(Vector2 pos, IInputHandler input, ICollision collision)
         {
@@ -59,23 +59,14 @@ namespace SideGamePrototype
 
     internal class WalkingState : DrawableState
     {
-        public WalkingState(RigidBody body, IInputHandler input)
+        public WalkingState(IRigidBody body, IInputHandler input)
             : base(body, input)
         {
         }
 
         public override State Update(float gt)
         {
-            if (this.input.LeftPressed)
-            {
-                this.body.AddVelocityComponent("move", new Vector2(-3, 0));
-                this.body.LookAt = new Vector2(-1, 0);
-            }
-            else if (this.input.RightPressed)
-            {
-                this.body.AddVelocityComponent("move", new Vector2(3, 0));
-                this.body.LookAt = new Vector2(1, 0);
-            }
+            this.body.AddMoveComponent(this.input, velocity: 3.0f);
 
             return base.Update(gt);
         }
@@ -86,7 +77,7 @@ namespace SideGamePrototype
 
     internal class FallingState : DrawableState
     {
-        public FallingState(RigidBody body, IInputHandler input)
+        public FallingState(IRigidBody body, IInputHandler input)
             : base(body, input)
         {
         }
@@ -94,17 +85,7 @@ namespace SideGamePrototype
         public override State Update(float gt)
         {
             this.body.AddForce("g", new Vector2(0, 3.5f));
-
-            if (this.input.LeftPressed)
-            {
-                this.body.AddVelocityComponent("move", new Vector2(-1, 0));
-                this.body.LookAt = new Vector2(-1, 0);
-            }
-            else if (this.input.RightPressed)
-            {
-                this.body.AddVelocityComponent("move", new Vector2(1, 0));
-                this.body.LookAt = new Vector2(1, 0);
-            }
+            this.body.AddMoveComponent(this.input, velocity: 1.0f);
 
             return base.Update(gt);
         }
@@ -115,7 +96,7 @@ namespace SideGamePrototype
 
     internal class JumpingState : DrawableState
     {
-        public JumpingState(RigidBody body, IInputHandler input)
+        public JumpingState(IRigidBody body, IInputHandler input)
             : base(body, input)
         {
         }
@@ -124,17 +105,7 @@ namespace SideGamePrototype
         {
             this.body.AddForce("g", new Vector2(0, 3.5f));
             this.body.AddVelocityComponent("jump", new Vector2(0, -5));
-
-            if (this.input.LeftPressed)
-            {
-                this.body.AddVelocityComponent("move", new Vector2(-3, 0));
-                this.body.LookAt = new Vector2(-1, 0);
-            }
-            else if (this.input.RightPressed)
-            {
-                this.body.AddVelocityComponent("move", new Vector2(3, 0));
-                this.body.LookAt = new Vector2(1, 0);
-            }
+            this.body.AddMoveComponent(this.input, velocity: 3.0f);
 
             return base.Update(gt);
         }
@@ -145,12 +116,12 @@ namespace SideGamePrototype
 
     internal abstract class DrawableState : State
     {
-        protected readonly RigidBody body;
+        protected readonly IRigidBody body;
         protected readonly IInputHandler input;
 
         protected abstract string GetTileString();
 
-        public DrawableState(RigidBody body, IInputHandler input)
+        public DrawableState(IRigidBody body, IInputHandler input)
         {
             this.body = body;
             this.input = input;
@@ -166,5 +137,22 @@ namespace SideGamePrototype
 
         public Tile GetTile()
             => R.Textures.Tiles.GetTileFromString(this.GetTileString());
+    }
+
+    internal static class RigidBodyEx
+    {
+        public static void AddMoveComponent(this IRigidBody body, IInputHandler input, float velocity)
+        {
+            if (input.LeftPressed)
+            {
+                body.AddVelocityComponent("move", new Vector2(-velocity, 0));
+                body.LookAt = new Vector2(-1, 0);
+            }
+            else if (input.RightPressed)
+            {
+                body.AddVelocityComponent("move", new Vector2(velocity, 0));
+                body.LookAt = new Vector2(1, 0);
+            }
+        }
     }
 }

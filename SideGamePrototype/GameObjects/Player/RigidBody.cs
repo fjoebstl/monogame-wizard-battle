@@ -4,22 +4,19 @@ using System.Collections.Generic;
 
 namespace SideGamePrototype
 {
-    public class PixelShape
+    internal interface IRigidBody
     {
-        public IEnumerable<Vector2> SolidPixels { get; set; }
-        public Vector2 Size { get; set; }
+        Rectangle BoundingBox { get; }
+        Vector2 LookAt { get; set; }
+        Vector2 Positon { get; set; }
+        bool WasCollision { get; }
 
-        public static PixelShape FromTile(Tile t)
-        {
-            return new PixelShape()
-            {
-                Size = t.Size,
-                SolidPixels = t.GetSolidPoints(),
-            };
-        }
+        void AddForce(string name, Vector2 f);
+        void AddVelocityComponent(string name, Vector2 f);
+        void Update(float dt);
     }
 
-    internal class RigidBody
+    internal class RigidBody : IRigidBody
     {
         private class ForceComponent
         {
@@ -93,6 +90,21 @@ namespace SideGamePrototype
             {
                 this.forces.Add(name, new ForceComponent());
             }
+        }
+    }
+
+    public class PixelShape
+    {
+        public IEnumerable<Vector2> SolidPixels { get; set; }
+        public Vector2 Size { get; set; }
+
+        public static PixelShape FromTile(Tile t)
+        {
+            return new PixelShape()
+            {
+                Size = t.Size,
+                SolidPixels = t.GetSolidPoints(),
+            };
         }
     }
 }
