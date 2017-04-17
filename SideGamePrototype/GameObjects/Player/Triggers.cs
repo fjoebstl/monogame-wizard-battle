@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SideGamePrototype.GameObjects.Player
+namespace SideGamePrototype
 {
     internal class BasicTrigger : ISignal
     {
@@ -50,6 +46,41 @@ namespace SideGamePrototype.GameObjects.Player
         public void Update(float gt)
         {
             this.time += gt;
+        }
+    }
+
+    internal class CombinedTrigger : ISignal
+    {
+        private readonly ISignal a;
+        private readonly ISignal b;
+        private readonly Func<bool, bool, bool> op;
+
+        public static CombinedTrigger Or(ISignal a, ISignal b)
+            => new CombinedTrigger(a, b, (j, k) => j || k);
+
+        public static CombinedTrigger And(ISignal a, ISignal b)
+           => new CombinedTrigger(a, b, (j, k) => j && k);
+
+        public CombinedTrigger(ISignal a, ISignal b, Func<bool, bool, bool> op)
+        {
+            this.a = a;
+            this.b = b;
+            this.op = op;
+        }
+
+        public void Reset()
+        {
+            this.a.Reset();
+            this.b.Reset();
+        }
+
+        public bool Triggers()
+            => this.op(this.a.Triggers(), this.b.Triggers());
+
+        public void Update(float gt)
+        {
+            this.a.Update(gt);
+            this.b.Update(gt);
         }
     }
 }

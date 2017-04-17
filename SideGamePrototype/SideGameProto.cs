@@ -31,11 +31,11 @@ namespace SideGamePrototype
             R.System.ToWindow();
 
             //create game map + player
-            var map = GameMapReader.FromFile(@"Content/Game.txt");
+            var map = GameMapMirrorReader.FromFile(@"Content/Game.txt");
             this.mapRenderer = new GameMapRenderer(map);
             var collision = new Collision(map);
 
-            this.entityList.Add(new Wizard2(
+            this.entityList.Add(new Wizard(
                 pos: new Vector2(100, 100),
                 input: new KeyboardLayout1InputHandler(),
                 collision: collision));

@@ -65,4 +65,42 @@ namespace SideGamePrototype
             return new GameMap(width, height, data);
         }
     }
+
+    public class GameMapMirrorReader
+    {
+        public static GameMap FromFile(string file)
+        {
+            var lines = File.ReadAllLines(file);
+            int width = lines[0].Length;
+            int height = lines.Count();
+
+            char[,] data = new char[width, height];
+
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    var rx = x;
+                    if (x > width / 2)
+                    {
+                        rx = width - x - 1;
+                    }
+
+                    var c = lines[y][rx];
+
+                    if (x > width / 2)
+                    {
+                        if (c == '(')
+                            c = ')';
+                        else if (c == ')')
+                            c = '(';
+                    }
+
+                    data[x, y] = c;
+                }
+            }
+
+            return new GameMap(width, height, data);
+        }
+    }
 }

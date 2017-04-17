@@ -46,7 +46,6 @@
     <Compile Include="GameObjects\Player\State.cs" />
     <Compile Include="GameObjects\Player\Triggers.cs" />
     <Compile Include="GameObjects\Player\Wizard.cs" />
-    <Compile Include="GameObjects\Player\Wizard2.cs" />
     <Compile Include="GameResources\Texture2dHelper.cs" />
     <Compile Include="SideGameProto.cs" />
     <Compile Include="Program.cs" />

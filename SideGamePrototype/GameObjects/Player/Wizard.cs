@@ -1,128 +1,170 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Resources;
-using System;
-using System.Collections.Generic;
 
 namespace SideGamePrototype
 {
-    public class Wizard : IEntity
+    internal class Wizard : IEntity
     {
-        private enum State
-        {
-            Standing, Jumping, Falling, Shooting
-        }
-
-        private static readonly Dictionary<State, string> stateMap = new Dictionary<State, string>
-        {
-            { State.Standing, "3,A" },
-            { State.Shooting, "3,B" },
-            { State.Jumping, "3,C" },
-            { State.Falling, "3,D" },
-        };
-
-        private readonly IInputHandler input;
-
-        private Vector2 pos;
-        private Vector2 vel = new Vector2();
-        private Vector2 acc = new Vector2();
-        private bool lastDirLeft = false;
-        private State state = State.Standing;
-
-        private ICollision collision;
-
-        private Rectangle BoundingBox => new Rectangle((int)this.pos.X, (int)this.pos.Y, 16, 16);
+        private DrawableState currentState;
+        private RigidBody body;
 
         public Wizard(Vector2 pos, IInputHandler input, ICollision collision)
         {
-            this.input = input;
-            this.pos = pos;
-            this.collision = collision;
+            this.body = new RigidBody(pos, GetCurrentShape, collision);
+
+            //States
+            var walkingState = new WalkingState(body, input);
+            var fallingState = new FallingState(body, input);
+            var jumpingState = new JumpingState(body, input);
+
+            //Triggers
+            var onGround = new BasicTrigger(() => collision.StandsOnGround(this.body.BoundingBox));
+            var notOnGround = new BasicTrigger(() => !collision.StandsOnGround(this.body.BoundingBox));
+            var jumpReady = CombinedTrigger.And(new DelayTrigger(0.2f), new BasicTrigger(() => input.JumpPressed));
+            var notJumpPressed = new BasicTrigger(() => !input.JumpPressed);
+            var jumpEnds = CombinedTrigger.Or(new DelayTrigger(0.3f), notJumpPressed);
+
+            walkingState.Add(notOnGround, () => fallingState);
+            walkingState.Add(jumpReady, () => jumpingState);
+
+            fallingState.Add(onGround, () => walkingState);
+            jumpingState.Add(jumpEnds, () => fallingState);
+
+            this.currentState = walkingState;
+        }
+
+        public void Draw(SpriteBatch s)
+        {
+            //DEBUG
+            //if (this.body.WasCollision)
+            //{
+            //    var b = this.body.BoundingBox;
+            //    s.Draw(R.Textures.Red, b, Color.White);
+            //}
+            //DEBUG
+
+            this.currentState.Draw(s);
         }
 
         public void Update(float dt)
         {
-            //this.acc = new Vector2();
-            var horizontalVel = new Vector2();
+            this.currentState = (DrawableState)this.currentState.Update(dt);
+            this.body.Update(dt);
+        }
 
-            var onground = this.collision.StandsOnGround(this.BoundingBox);
-            if (onground)
-            {
-                this.state = State.Standing;
-            }
-            else
-            {
-                //gravity
-                this.acc += new Vector2(0, 3) * dt;
-            }
+        private PixelShape GetCurrentShape()
+            => PixelShape.FromTile(this.currentState.GetTile());
+    }
 
+    internal class WalkingState : DrawableState
+    {
+        public WalkingState(RigidBody body, IInputHandler input)
+            : base(body, input)
+        {
+        }
+
+        public override State Update(float gt)
+        {
             if (this.input.LeftPressed)
             {
-                horizontalVel = new Vector2(-3, 0);
-                this.lastDirLeft = true;
+                this.body.AddVelocityComponent("move", new Vector2(-3, 0));
+                this.body.LookAt = new Vector2(-1, 0);
             }
             else if (this.input.RightPressed)
             {
-                horizontalVel = new Vector2(3, 0);
-                this.lastDirLeft = false;
+                this.body.AddVelocityComponent("move", new Vector2(3, 0));
+                this.body.LookAt = new Vector2(1, 0);
             }
 
-            if (this.input.JumpPressed && onground)
-            {
-                this.acc = new Vector2(0, -0.65f);
-                this.jumpcount++;
-                this.state = State.Jumping;
-            }
-
-            this.vel += Limit(this.acc, 3);
-            this.vel = Limit(this.vel, 5);
-
-            var totalVel = this.vel + horizontalVel;
-            //this.WasColl = this.collision.Move(ref this.pos, this.pos + totalVel, this.GetTile());
-            if (this.WasColl)
-            {
-                this.acc = new Vector2();
-                this.vel = new Vector2();
-            }
+            return base.Update(gt);
         }
 
-        private bool WasColl;
-        private int jumpcount = 0;
+        protected override string GetTileString()
+            => "3,A";
+    }
 
-        private Vector2 Limit(Vector2 vel, int limit)
+    internal class FallingState : DrawableState
+    {
+        public FallingState(RigidBody body, IInputHandler input)
+            : base(body, input)
         {
-            vel.X = vel.X < -limit || vel.X > limit ? limit * Math.Sign(vel.X) : vel.X;
-            vel.Y = vel.Y < -limit || vel.Y > limit ? limit * Math.Sign(vel.Y) : vel.Y;
-
-            return vel;
         }
 
-        private bool DEBUG = true;
+        public override State Update(float gt)
+        {
+            this.body.AddForce("g", new Vector2(0, 3.5f));
+
+            if (this.input.LeftPressed)
+            {
+                this.body.AddVelocityComponent("move", new Vector2(-1, 0));
+                this.body.LookAt = new Vector2(-1, 0);
+            }
+            else if (this.input.RightPressed)
+            {
+                this.body.AddVelocityComponent("move", new Vector2(1, 0));
+                this.body.LookAt = new Vector2(1, 0);
+            }
+
+            return base.Update(gt);
+        }
+
+        protected override string GetTileString()
+            => "3,D";
+    }
+
+    internal class JumpingState : DrawableState
+    {
+        public JumpingState(RigidBody body, IInputHandler input)
+            : base(body, input)
+        {
+        }
+
+        public override State Update(float gt)
+        {
+            this.body.AddForce("g", new Vector2(0, 3.5f));
+            this.body.AddVelocityComponent("jump", new Vector2(0, -5));
+
+            if (this.input.LeftPressed)
+            {
+                this.body.AddVelocityComponent("move", new Vector2(-3, 0));
+                this.body.LookAt = new Vector2(-1, 0);
+            }
+            else if (this.input.RightPressed)
+            {
+                this.body.AddVelocityComponent("move", new Vector2(3, 0));
+                this.body.LookAt = new Vector2(1, 0);
+            }
+
+            return base.Update(gt);
+        }
+
+        protected override string GetTileString()
+            => "3,C";
+    }
+
+    internal abstract class DrawableState : State
+    {
+        protected readonly RigidBody body;
+        protected readonly IInputHandler input;
+
+        protected abstract string GetTileString();
+
+        public DrawableState(RigidBody body, IInputHandler input)
+        {
+            this.body = body;
+            this.input = input;
+        }
+
         public void Draw(SpriteBatch s)
         {
             var t = GetTile();
-            t.Draw(s, this.pos, !lastDirLeft ? SpriteEffects.FlipHorizontally : SpriteEffects.None);
-
-            if (DEBUG)
-            {
-                var onground = this.collision.StandsOnGround(this.BoundingBox);
-                if (onground)
-                {
-                    s.Draw(R.Textures.Red, new Rectangle(this.BoundingBox.X, this.BoundingBox.Bottom - 2, this.BoundingBox.Width, 4), Color.White);
-                }
-                //var coll = this.collision.Move(ref this.pos, this.pos, this.GetTile());
-                if (WasColl)
-                {
-                    var b = this.BoundingBox;
-                    //b.Inflate(-4, -4);
-                    s.Draw(R.Textures.Red, b, Color.White);
-                }
-            }
+            t.Draw(s, this.body.Positon, this.body.LookAt.X > 0
+                ? SpriteEffects.FlipHorizontally
+                : SpriteEffects.None);
         }
 
-        private Tile GetTile()
-        {
-            return R.Textures.Tiles.GetTileFromString(stateMap[this.state]);
-        }
+        public Tile GetTile()
+            => R.Textures.Tiles.GetTileFromString(this.GetTileString());
     }
 }

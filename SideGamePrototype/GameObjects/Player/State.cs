@@ -28,6 +28,7 @@ namespace SideGamePrototype
 
         public virtual void OnExit()
         {
+            this.enterCalled = false;
         }
 
         public void Add(ISignal signal, Func<State> creator)

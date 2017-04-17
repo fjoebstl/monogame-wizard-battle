@@ -24,8 +24,8 @@ namespace SideGamePrototype
             //Check X--X--X bottom points of rectangle
 
             var bottomCenter = new Vector2(boundingBox.Center.X, boundingBox.Bottom);
-            var bottomLeft = new Vector2(boundingBox.X, boundingBox.Bottom);
-            var bottomRight = new Vector2(boundingBox.Right, boundingBox.Bottom);
+            var bottomLeft = new Vector2(boundingBox.X + 2, boundingBox.Bottom);
+            var bottomRight = new Vector2(boundingBox.Right - 2, boundingBox.Bottom);
 
             return IsNotPassable(bottomCenter) || IsNotPassable(bottomLeft) || IsNotPassable(bottomRight);
         }
