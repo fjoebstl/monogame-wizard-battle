@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Resources;
+using System;
 
 namespace SideGamePrototype
 {
@@ -96,15 +97,27 @@ namespace SideGamePrototype
 
     internal class JumpingState : DrawableState
     {
+        private float elapsed = 0.0f;
+
         public JumpingState(IRigidBody body, IInputHandler input)
             : base(body, input)
         {
         }
 
+        public override void OnEnter()
+        {
+            this.elapsed = 0.0f;
+            base.OnEnter();
+        }
+
         public override State Update(float gt)
         {
+            this.elapsed += gt;
+
+            var jumpforce = Math.Max(5 - this.elapsed * 4, 0);
+
             this.body.AddForce("g", new Vector2(0, 3.5f));
-            this.body.AddVelocityComponent("jump", new Vector2(0, -5));
+            this.body.AddVelocityComponent("jump", new Vector2(0, -jumpforce));
             this.body.AddMoveComponent(this.input, velocity: 3.0f);
 
             return base.Update(gt);
