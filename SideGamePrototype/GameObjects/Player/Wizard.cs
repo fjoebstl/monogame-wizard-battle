@@ -21,8 +21,8 @@ namespace SideGamePrototype
             var diveState = new DiveDownState(body, input);
 
             //Triggers
-            var onGround = new BasicTrigger(() => collision.StandsOnGround(this.body.BoundingBox));
-            var notOnGround = new BasicTrigger(() => !collision.StandsOnGround(this.body.BoundingBox));
+            var onGround = new BasicTrigger(() => collision.StandsOnGround(this.body));
+            var notOnGround = new BasicTrigger(() => !collision.StandsOnGround(this.body));
             var jumpReady = CombinedTrigger.And(new DelayTrigger(0.2f), new BasicTrigger(() => input.JumpPressed));
             var notJumpPressed = new BasicTrigger(() => !input.JumpPressed);
             var downPressed = new BasicTrigger(() => input.CrouchPressed);
@@ -61,7 +61,7 @@ namespace SideGamePrototype
         }
 
         private PixelShape GetCurrentShape()
-            => PixelShape.FromTile(this.currentState.GetTile());
+            => PixelShape.FromTile(this.currentState.GetCollisionTile());
     }
 
     internal class WalkingState : DrawableState
@@ -175,6 +175,9 @@ namespace SideGamePrototype
 
         public Tile GetTile()
             => R.Textures.Tiles.GetTileFromString(this.GetTileString());
+
+        public Tile GetCollisionTile()
+            => R.Textures.Tiles.GetCollisionTileFromString(this.GetTileString());
     }
 
     internal static class RigidBodyEx

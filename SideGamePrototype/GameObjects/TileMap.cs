@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Resources;
+using System;
 using System.Collections.Generic;
 
 namespace SideGamePrototype
@@ -81,9 +82,10 @@ namespace SideGamePrototype
             { '#', "1,B" },
             { '(', "1,A" },
             { ')', "1,C" },
+            { '§', "1,D" },
         };
 
-        private Dictionary<string, Tile> cache = new Dictionary<string, Tile>();
+        private Dictionary<Rectangle, Tile> cache = new Dictionary<Rectangle, Tile>();
 
         public TileMap(Texture2D t)
         {
@@ -98,13 +100,28 @@ namespace SideGamePrototype
             return GetTileFromString(tileMapping[ch]);
         }
 
-        public Tile GetTileFromString(string resKey)
+        public Tile GetCollisionTileFromChar(char ch)
         {
-            if (!this.cache.ContainsKey(resKey))
+            if (!tileMapping.ContainsKey(ch))
+                return null;
+
+            return GetCollisionTileFromString(tileMapping[ch]);
+        }
+
+        public Tile GetTileFromString(string resKey)
+            => this.GetTileFromString(resKey, t => t);
+
+        public Tile GetCollisionTileFromString(string resKey)
+            => this.GetTileFromString(resKey, t => t + new Vector2(0, 1));
+
+        private Tile GetTileFromString(string resKey, Func<Vector2, Vector2> trans)
+        {
+            var r = VecToRec(trans(StrToVec(resKey)));
+            if (!this.cache.ContainsKey(r))
             {
-                this.cache.Add(resKey, new Tile(this.t, VecToRec(StrToVec(resKey))));
+                this.cache.Add(r, new Tile(this.t, r));
             }
-            return this.cache[resKey];
+            return this.cache[r];
         }
 
         private static Vector2 StrToVec(string s)

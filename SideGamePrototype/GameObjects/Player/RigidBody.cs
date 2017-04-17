@@ -7,6 +7,8 @@ namespace SideGamePrototype
     internal interface IRigidBody
     {
         Rectangle BoundingBox { get; }
+        PixelShape Shape { get; }
+
         Vector2 LookAt { get; set; }
         Vector2 Positon { get; set; }
         bool WasCollision { get; }
@@ -34,6 +36,8 @@ namespace SideGamePrototype
             (int)this.Positon.Y,
             (int)this.getCurrentShape().Size.X,
             (int)this.getCurrentShape().Size.Y);
+
+        public PixelShape Shape => this.getCurrentShape();
 
         private readonly ICollision collision;
         private readonly Func<PixelShape> getCurrentShape;

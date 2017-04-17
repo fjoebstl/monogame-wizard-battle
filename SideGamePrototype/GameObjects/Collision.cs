@@ -1,16 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
+using Resources;
 
 namespace SideGamePrototype
 {
-    public interface ICollision
+    internal interface ICollision
     {
         bool Move(ref Vector2 pos, Vector2 newPos, PixelShape t);
-        bool StandsOnGround(Rectangle boundingBox);
+        bool StandsOnGround(IRigidBody body);
     }
 
-    public class Collision : ICollision
+    internal class Collision : ICollision
     {
         private GameMap map;
 
@@ -19,29 +20,44 @@ namespace SideGamePrototype
             this.map = map;
         }
 
-        public bool StandsOnGround(Rectangle boundingBox)
+        public bool StandsOnGround(IRigidBody body)
         {
-            //Check X--X--X bottom points of rectangle
+            var p = body.Shape.SolidPixels;
+            var min = p.Max(y => y.Y);
 
-            var bottomCenter = new Vector2(boundingBox.Center.X, boundingBox.Bottom);
-            var bottomLeft = new Vector2(boundingBox.X + 2, boundingBox.Bottom);
-            var bottomRight = new Vector2(boundingBox.Right - 2, boundingBox.Bottom);
+            var bottomPixelOfShape = p.Where(y => y.Y == min);
+            var collisionLine = Translate(Translate(bottomPixelOfShape, body.Positon), new Vector2(0, 1));
 
-            return IsNotPassable(bottomCenter) || IsNotPassable(bottomLeft) || IsNotPassable(bottomRight);
+            return Collides(collisionLine);
         }
 
-        private bool IsNotPassable(Vector2 p)
-            => GetTileAt(p) != ' ';
+        private bool IsSolid(Vector2 p)
+        {
+            char tileChar = GetTileAt(p);
+
+            if (tileChar == ' ')
+                return false;
+
+            var solidPoints = R.Textures.Tiles.GetCollisionTileFromChar(tileChar).GetSolidPoints();
+
+            var tileTopLeft = new Vector2((int)(p.X / 16) * 16, (int)(p.Y / 16) * 16);
+            var trans = Translate(solidPoints, tileTopLeft);
+
+            if (trans.Any(aa => (int)aa.X == (int)p.X && (int)aa.Y == (int)p.Y))
+                return true;
+
+            return false;
+        }
 
         private char GetTileAt(Vector2 p)
             => this.map.Data[(int)(p.X / 16), (int)(p.Y / 16)];
 
         public bool Collides(IEnumerable<Vector2> solidPixels)
-            => solidPixels.Any(p => IsNotPassable(p));
+            => solidPixels.Any(p => IsSolid(p));
 
         public bool Collides(IEnumerable<Vector2> solidPixels, out Vector2 ct)
         {
-            ct = solidPixels.FirstOrDefault(p => IsNotPassable(p));
+            ct = solidPixels.FirstOrDefault(p => IsSolid(p));
             return ct != default(Vector2);
         }
 
@@ -84,7 +100,7 @@ namespace SideGamePrototype
             return collided;
         }
 
-        private IEnumerable<Vector2> Translate(List<Vector2> o, Vector2 off)
+        private IEnumerable<Vector2> Translate(IEnumerable<Vector2> o, Vector2 off)
             => o.Select(i => i + off);
     }
 }
