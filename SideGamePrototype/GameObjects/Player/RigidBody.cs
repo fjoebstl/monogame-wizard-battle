@@ -77,7 +77,9 @@ namespace SideGamePrototype
             do
             {
                 collResult = this.collision.Move(this, pos);
-                pos = this.Positon + (pos - this.Positon) / 2.0f;
+
+                if (collResult.WasCollision)
+                    pos = this.Positon + (pos - this.Positon) / 2.0f;
             } while (collResult.WasCollision && Math.Abs((pos - this.Positon).Length()) > 0.5f);
 
             //collResult = this.collision.Move(this, pos);

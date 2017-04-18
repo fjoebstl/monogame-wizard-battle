@@ -33,7 +33,7 @@ namespace SideGamePrototype
             var downPressed = Trigger.From(() => input.CrouchPressed);
 
             var jumpEnds = Trigger.Or(
-                Trigger.Delay(1.5f),
+                Trigger.Delay(JumpingState.Duration),
                 notJumpPressed,
                 Trigger.And(
                     Trigger.Delay(0.2f),
@@ -82,6 +82,8 @@ namespace SideGamePrototype
 
     internal class WalkingState : DrawableState
     {
+        private bool isMoving = false;
+
         public WalkingState(IRigidBody body, IInputHandler input)
             : base(body, input)
         {
@@ -89,13 +91,13 @@ namespace SideGamePrototype
 
         public override State Update(float gt)
         {
-            this.body.AddMoveComponent(this.input, velocity: 3.0f);
+            this.isMoving = this.body.AddMoveComponent(this.input, velocity: 3.0f);
 
             return base.Update(gt);
         }
 
         protected override string GetTileString()
-            => "3,A";
+            => this.isMoving ? "3,F" : "3,A";
     }
 
     internal class FallingState : DrawableState
@@ -119,6 +121,10 @@ namespace SideGamePrototype
 
     internal class JumpingState : DrawableState
     {
+        public static float Duration = 1.5f;
+        public static float Force = 5.0f;
+        public static float Mul => Force / Duration;
+
         private float elapsed = 0.0f;
 
         public JumpingState(IRigidBody body, IInputHandler input)
@@ -136,7 +142,7 @@ namespace SideGamePrototype
         {
             this.elapsed += gt;
 
-            var jumpforce = Math.Max(8 - this.elapsed * 4, 0);
+            var jumpforce = Math.Max(Force - this.elapsed * Mul, 0);
 
             this.body.AddForce("g", new Vector2(0, 3.5f));
             this.body.AddVelocityComponent("jump", new Vector2(0, -jumpforce));
@@ -198,18 +204,22 @@ namespace SideGamePrototype
 
     internal static class RigidBodyEx
     {
-        public static void AddMoveComponent(this IRigidBody body, IInputHandler input, float velocity)
+        public static bool AddMoveComponent(this IRigidBody body, IInputHandler input, float velocity)
         {
             if (input.LeftPressed)
             {
                 body.AddVelocityComponent("move", new Vector2(-velocity, 0));
                 body.LookAt = new Vector2(-1, 0);
+                return true;
             }
             else if (input.RightPressed)
             {
                 body.AddVelocityComponent("move", new Vector2(velocity, 0));
                 body.LookAt = new Vector2(1, 0);
+                return true;
             }
+
+            return false;
         }
     }
 }
