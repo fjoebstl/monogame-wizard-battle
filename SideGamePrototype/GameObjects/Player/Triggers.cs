@@ -2,6 +2,24 @@
 
 namespace SideGamePrototype
 {
+    internal class Trigger
+    {
+        public static ISignal Or(ISignal a, ISignal b)
+         => new CombinedTrigger(a, b, (j, k) => j || k);
+
+        public static ISignal Or(ISignal a, ISignal b, ISignal c)
+           => Or(a, Or(b, c));
+
+        public static ISignal And(ISignal a, ISignal b)
+           => new CombinedTrigger(a, b, (j, k) => j && k);
+
+        public static ISignal From(Func<bool> f)
+            => new BasicTrigger(f);
+
+        public static ISignal Delay(float delay)
+           => new DelayTrigger(delay);
+    }
+
     internal class BasicTrigger : ISignal
     {
         private readonly Func<bool> trigger;
@@ -54,12 +72,6 @@ namespace SideGamePrototype
         private readonly ISignal a;
         private readonly ISignal b;
         private readonly Func<bool, bool, bool> op;
-
-        public static CombinedTrigger Or(ISignal a, ISignal b)
-            => new CombinedTrigger(a, b, (j, k) => j || k);
-
-        public static CombinedTrigger And(ISignal a, ISignal b)
-           => new CombinedTrigger(a, b, (j, k) => j && k);
 
         public CombinedTrigger(ISignal a, ISignal b, Func<bool, bool, bool> op)
         {

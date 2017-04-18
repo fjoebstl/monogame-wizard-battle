@@ -23,17 +23,21 @@ namespace SideGamePrototype
             var diveState = new DiveDownState(Body, input);
 
             //Triggers
-            var onGround = new BasicTrigger(() => this.Body.LastCollisionResult.StandsOnGround);
-            var notOnGround = new BasicTrigger(() => !this.Body.LastCollisionResult.StandsOnGround);
-            var jumpReady = CombinedTrigger.And(new DelayTrigger(0.2f), new BasicTrigger(() => input.JumpPressed));
+            var onGround = Trigger.From(() => this.Body.LastCollisionResult.StandsOnGround);
+            var notOnGround = Trigger.From(() => !this.Body.LastCollisionResult.StandsOnGround);
+            var jumpReady = Trigger.And(
+                Trigger.Delay(0.2f),
+                Trigger.From(() => input.JumpPressed));
 
-            var notJumpPressed = new BasicTrigger(() => !input.JumpPressed);
-            var downPressed = new BasicTrigger(() => input.CrouchPressed);
+            var notJumpPressed = Trigger.From(() => !input.JumpPressed);
+            var downPressed = Trigger.From(() => input.CrouchPressed);
 
-            var jumpEnds = CombinedTrigger.Or(
-                new DelayTrigger(1.5f), CombinedTrigger.Or(
-                    notJumpPressed,
-                    CombinedTrigger.And(new DelayTrigger(0.2f), new BasicTrigger(() => this.Body.LastCollisionResult.WasCollision))));
+            var jumpEnds = Trigger.Or(
+                Trigger.Delay(1.5f),
+                notJumpPressed,
+                Trigger.And(
+                    Trigger.Delay(0.2f),
+                    Trigger.From(() => this.Body.LastCollisionResult.WasCollision)));
 
             walkingState.Add(notOnGround, () => fallingState);
             walkingState.Add(jumpReady, () => jumpingState);
