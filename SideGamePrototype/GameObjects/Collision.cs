@@ -7,100 +7,103 @@ namespace SideGamePrototype
 {
     internal interface ICollision
     {
-        bool Move(ref Vector2 pos, Vector2 newPos, PixelShape t);
-        bool StandsOnGround(IRigidBody body);
+        CollisionResult Move(IRigidBody body, Vector2 targetPosition);
+    }
+
+    internal class CollisionResult
+    {
+        public List<Point> CollisionPoints { get; set; } = new List<Point>();
+        public bool WasCollision => this.CollisionPoints.Any();
+        public bool StandsOnGround { get; set; } = false;
+
+        public void Add(CollisionResult collResult)
+        {
+            this.CollisionPoints.AddRange(collResult.CollisionPoints);
+            this.StandsOnGround = collResult.StandsOnGround;
+        }
     }
 
     internal class Collision : ICollision
     {
-        private GameMap map;
+        private readonly GameMap map;
+        private readonly List<IEntity> entities;
 
-        public Collision(GameMap map)
+        public Collision(GameMap map, List<IEntity> entities)
         {
             this.map = map;
+            this.entities = entities;
         }
 
-        public bool StandsOnGround(IRigidBody body)
+        public CollisionResult Move(IRigidBody body, Vector2 targetPosition)
         {
-            var p = body.Shape.SolidPixels;
-            var min = p.Max(y => y.Y);
+            var oldPosition = body.Positon;
 
-            var bottomPixelOfShape = p.Where(y => y.Y == min);
-            var collisionLine = Translate(Translate(bottomPixelOfShape, body.Positon), new Vector2(0, 1));
+            body.Positon = targetPosition;
+            var r = Collides(body);
+            body.Positon = oldPosition;
 
-            return Collides(collisionLine);
+            return r;
         }
 
-        private bool IsSolid(Vector2 p)
+        private CollisionResult Collides(IRigidBody body)
         {
-            char tileChar = GetTileAt(p);
+            //Points to test
+            var test = Translate(body.Shape.SolidPixels, body.Positon)
+                .Select(x => x.ToPoint());
 
+            //Collect all tile and entity points
+            var tiles = GetEdgePoints(body.BoundingBox)
+                .SelectMany(p => TileCharToPoints(GetTileCharAt(p), p))
+                .Select(x => x.ToPoint());
+
+            var entities = this.entities
+                .Where(e => e.Body != body && e.Body.BoundingBox.Intersects(body.BoundingBox))
+                .SelectMany(e => Translate(e.Body.Shape.SolidPixels, e.Body.Positon))
+                .Select(x => x.ToPoint());
+
+            var all = tiles.Union(entities);
+
+            //Test collision
+            var r = all.Intersect(test);
+
+            //Test if body on ground
+            var origin = body.BoundingBox.Center;
+            var rOnGround = all.Intersect(Translate(test, new Point(0, 1)));
+            var onGround = rOnGround.Any() && rOnGround.All(p => p.Y > origin.Y);
+
+            return new CollisionResult() { CollisionPoints = r.ToList(), StandsOnGround = onGround };
+        }
+
+        private IEnumerable<Vector2> TileCharToPoints(char tileChar, Vector2 p)
+        {
             if (tileChar == ' ')
-                return false;
+                return new List<Vector2>();
 
             var solidPoints = R.Textures.Tiles.GetCollisionTileFromChar(tileChar).GetSolidPoints();
-
             var tileTopLeft = new Vector2((int)(p.X / 16) * 16, (int)(p.Y / 16) * 16);
             var trans = Translate(solidPoints, tileTopLeft);
 
-            if (trans.Any(aa => (int)aa.X == (int)p.X && (int)aa.Y == (int)p.Y))
-                return true;
-
-            return false;
+            return trans;
         }
 
-        private char GetTileAt(Vector2 p)
+        private char GetTileCharAt(Vector2 p)
             => this.map.Data[(int)(p.X / 16), (int)(p.Y / 16)];
-
-        public bool Collides(IEnumerable<Vector2> solidPixels)
-            => solidPixels.Any(p => IsSolid(p));
-
-        public bool Collides(IEnumerable<Vector2> solidPixels, out Vector2 ct)
-        {
-            ct = solidPixels.FirstOrDefault(p => IsSolid(p));
-            return ct != default(Vector2);
-        }
-
-        public bool Move(ref Vector2 pos, Vector2 newPos, PixelShape shape)
-        {
-            var pixels = shape.SolidPixels.ToList();
-            bool collided = false;
-
-            //Free if stuck:
-            //if pos is a collition before moving try to "push" objectCenter
-            //away from collition
-            Vector2 collisionPoint;
-            if (Collides(Translate(pixels, pos), out collisionPoint))
-            {
-                var objectCenter = pos + shape.Size / 2;
-                pos += objectCenter - collisionPoint;
-                return true;
-            }
-
-            //Move iteration:
-            //If newPos would result in an collision binary search for position
-            //between pos <--> newPos.
-            //break binary search after maxIterations
-            int iterations = 0;
-            int maxIterations = 4;
-            while (Collides(Translate(pixels, newPos)))
-            {
-                collided = true;
-                newPos = (pos + newPos) / 2;
-                iterations++;
-
-                if (iterations > maxIterations)
-                {
-                    return true;
-                }
-            }
-
-            pos = newPos;
-
-            return collided;
-        }
 
         private IEnumerable<Vector2> Translate(IEnumerable<Vector2> o, Vector2 off)
             => o.Select(i => i + off);
+
+        private IEnumerable<Point> Translate(IEnumerable<Point> o, Point off)
+            => o.Select(i => i + off);
+
+        private IEnumerable<Vector2> GetEdgePoints(Rectangle r)
+        {
+            return new Vector2[4]
+            {
+                new Vector2(r.Left, r.Top),
+                new Vector2(r.Right, r.Top),
+                new Vector2(r.Left, r.Bottom),
+                new Vector2(r.Right, r.Bottom),
+            };
+        }
     }
 }

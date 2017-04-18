@@ -33,11 +33,16 @@ namespace SideGamePrototype
             //create game map + player
             var map = GameMapMirrorReader.FromFile(@"Content/Game.txt");
             this.mapRenderer = new GameMapRenderer(map);
-            var collision = new Collision(map);
+            var collision = new Collision(map, this.entityList);
 
             this.entityList.Add(new Wizard(
-                pos: new Vector2(100, 100),
+                pos: new Vector2(100, 500),
                 input: new KeyboardLayout1InputHandler(),
+                collision: collision));
+
+            this.entityList.Add(new Wizard(
+                pos: new Vector2(200, 500),
+                input: new KeyboardLayout2InputHandler(),
                 collision: collision));
         }
 

@@ -46,7 +46,7 @@ namespace SideGamePrototype
                 effects: eff,
                 layerDepth: 1.0f);
 
-        public List<Vector2> GetSolidPoints()
+        public IEnumerable<Vector2> GetSolidPoints()
         {
             //Get all pixels of image which are not fully transparent
 
@@ -65,7 +65,7 @@ namespace SideGamePrototype
                 }
             }
 
-            return l;
+            return l.ToArray();
         }
     }
 

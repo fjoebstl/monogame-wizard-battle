@@ -2,31 +2,38 @@
 using Microsoft.Xna.Framework.Graphics;
 using Resources;
 using System;
+using System.Diagnostics;
 
 namespace SideGamePrototype
 {
     internal class Wizard : IEntity
     {
+        public IRigidBody Body { get; private set; }
+
         private DrawableState currentState;
-        private IRigidBody body;
 
         public Wizard(Vector2 pos, IInputHandler input, ICollision collision)
         {
-            this.body = new RigidBody(pos, GetCurrentShape, collision);
+            this.Body = new RigidBody(pos, GetCurrentShape, collision);
 
             //States
-            var walkingState = new WalkingState(body, input);
-            var fallingState = new FallingState(body, input);
-            var jumpingState = new JumpingState(body, input);
-            var diveState = new DiveDownState(body, input);
+            var walkingState = new WalkingState(Body, input);
+            var fallingState = new FallingState(Body, input);
+            var jumpingState = new JumpingState(Body, input);
+            var diveState = new DiveDownState(Body, input);
 
             //Triggers
-            var onGround = new BasicTrigger(() => collision.StandsOnGround(this.body));
-            var notOnGround = new BasicTrigger(() => !collision.StandsOnGround(this.body));
+            var onGround = new BasicTrigger(() => this.Body.LastCollisionResult.StandsOnGround);
+            var notOnGround = new BasicTrigger(() => !this.Body.LastCollisionResult.StandsOnGround);
             var jumpReady = CombinedTrigger.And(new DelayTrigger(0.2f), new BasicTrigger(() => input.JumpPressed));
+
             var notJumpPressed = new BasicTrigger(() => !input.JumpPressed);
             var downPressed = new BasicTrigger(() => input.CrouchPressed);
-            var jumpEnds = CombinedTrigger.Or(new DelayTrigger(0.3f), notJumpPressed);
+
+            var jumpEnds = CombinedTrigger.Or(
+                new DelayTrigger(1.5f), CombinedTrigger.Or(
+                    notJumpPressed,
+                    CombinedTrigger.And(new DelayTrigger(0.2f), new BasicTrigger(() => this.Body.LastCollisionResult.WasCollision))));
 
             walkingState.Add(notOnGround, () => fallingState);
             walkingState.Add(jumpReady, () => jumpingState);
@@ -44,9 +51,9 @@ namespace SideGamePrototype
         public void Draw(SpriteBatch s)
         {
             //DEBUG
-            //if (this.body.WasCollision)
+            //if (this.Body.LastCollisionResult.WasCollision)
             //{
-            //    var b = this.body.BoundingBox;
+            //    var b = this.Body.BoundingBox;
             //    s.Draw(R.Textures.Red, b, Color.White);
             //}
             //DEBUG
@@ -57,7 +64,12 @@ namespace SideGamePrototype
         public void Update(float dt)
         {
             this.currentState = (DrawableState)this.currentState.Update(dt);
-            this.body.Update(dt);
+
+            var s = Stopwatch.StartNew();
+            this.Body.Update(dt);
+            s.Stop();
+
+            //Console.WriteLine(s.ElapsedMilliseconds);
         }
 
         private PixelShape GetCurrentShape()
@@ -120,7 +132,7 @@ namespace SideGamePrototype
         {
             this.elapsed += gt;
 
-            var jumpforce = Math.Max(5 - this.elapsed * 4, 0);
+            var jumpforce = Math.Max(8 - this.elapsed * 4, 0);
 
             this.body.AddForce("g", new Vector2(0, 3.5f));
             this.body.AddVelocityComponent("jump", new Vector2(0, -jumpforce));

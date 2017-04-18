@@ -11,7 +11,7 @@ namespace SideGamePrototype
 
         Vector2 LookAt { get; set; }
         Vector2 Positon { get; set; }
-        bool WasCollision { get; }
+        CollisionResult LastCollisionResult { get; }
 
         void AddForce(string name, Vector2 f);
         void AddVelocityComponent(string name, Vector2 f);
@@ -29,7 +29,7 @@ namespace SideGamePrototype
 
         public Vector2 Positon { get; set; }
         public Vector2 LookAt { get; set; } = new Vector2();
-        public bool WasCollision { get; private set; }
+        public CollisionResult LastCollisionResult { get; private set; } = new CollisionResult();
 
         public Rectangle BoundingBox => new Rectangle(
             (int)this.Positon.X,
@@ -65,27 +65,50 @@ namespace SideGamePrototype
 
         public void Update(float dt)
         {
-            var wasCollition = false;
+            var pos = this.Positon;
             foreach (var force in this.forces.Values)
             {
                 force.vel += force.acc * dt;
+                pos += force.vel;
+            }
 
-                var pos = this.Positon;
+            CollisionResult collResult = new CollisionResult();
 
-                var coll = this.collision.Move(ref pos, pos + force.vel, this.getCurrentShape());
+            do
+            {
+                collResult = this.collision.Move(this, pos);
+                pos = this.Positon + (pos - this.Positon) / 2.0f;
+            } while (collResult.WasCollision && Math.Abs((pos - this.Positon).Length()) > 0.5f);
 
-                force.acc = new Vector2();
-                if (coll || force.isVelocityComponent)
-                {
-                    force.vel = new Vector2();
-                }
+            //collResult = this.collision.Move(this, pos);
+            //if (collResult.WasCollision)
+            //{
+            //    pos = this.Positon - (pos - this.Positon) / 2.0f;
+            //    ResetForces(collResult);
+            //    collResult = this.collision.Move(this, pos);
+            //}
 
-                wasCollition = wasCollition || coll;
-
+            if (!collResult.WasCollision)
+            {
                 this.Positon = pos;
             }
 
-            this.WasCollision = wasCollition;
+            ResetForces(collResult);
+
+            this.LastCollisionResult.CollisionPoints = collResult.CollisionPoints;
+            this.LastCollisionResult.StandsOnGround = this.collision.Move(this, this.Positon).StandsOnGround;
+        }
+
+        private void ResetForces(CollisionResult collResult)
+        {
+            foreach (var force in this.forces.Values)
+            {
+                force.acc = new Vector2();
+                if (collResult.WasCollision || force.isVelocityComponent)
+                {
+                    force.vel = new Vector2();
+                }
+            }
         }
 
         private void EnsureExists(string name)

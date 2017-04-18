@@ -19,4 +19,13 @@ namespace SideGamePrototype
         public bool FirePressed => Keyboard.GetState().IsKeyDown(Keys.Space);
         public bool CrouchPressed => Keyboard.GetState().IsKeyDown(Keys.Down);
     }
+
+    public class KeyboardLayout2InputHandler : IInputHandler
+    {
+        public bool LeftPressed => Keyboard.GetState().IsKeyDown(Keys.A);
+        public bool RightPressed => Keyboard.GetState().IsKeyDown(Keys.D);
+        public bool JumpPressed => Keyboard.GetState().IsKeyDown(Keys.W);
+        public bool FirePressed => Keyboard.GetState().IsKeyDown(Keys.LeftShift);
+        public bool CrouchPressed => Keyboard.GetState().IsKeyDown(Keys.S);
+    }
 }
