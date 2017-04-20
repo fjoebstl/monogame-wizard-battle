@@ -11,6 +11,7 @@ namespace SideGamePrototype
         private SpriteBatch spriteBatch;
         private GameMapRenderer mapRenderer;
         private List<IEntity> entityList = new List<IEntity>();
+        private Camera2D cam;
 
         public SideGameProto()
         {
@@ -29,6 +30,9 @@ namespace SideGamePrototype
             //init game resources
             R.Init(graphics, Content, this.Window.Handle);
             R.System.ToWindow();
+
+            //init camera
+            this.cam = new Camera2D(graphics.GraphicsDevice.Viewport);
 
             //create game map + player
             var map = GameMapMirrorReader.FromFile(@"Content/Game.txt");
@@ -57,6 +61,22 @@ namespace SideGamePrototype
 
             this.entityList.ForEach(e => e.Update(dt));
 
+            //Camera TEST
+            var w1 = this.entityList[0];
+            var w2 = this.entityList[1];
+
+            var origin = w1.Body.Positon - (w1.Body.Positon - w2.Body.Positon) / 2.0f;
+
+            this.cam.Position = origin - new Vector2(
+                this.graphics.GraphicsDevice.Viewport.Width,
+                this.graphics.GraphicsDevice.Viewport.Height) / 2.0f;
+
+            var r = MathUtil.Union(w1.Body.BoundingBox, w2.Body.BoundingBox);
+            r.Inflate(200, 100);
+
+            this.cam.ZoomWidth(r.Width, 1.0f, 3.0f);
+            //Camera TEST
+
             base.Update(gameTime);
         }
 
@@ -70,9 +90,12 @@ namespace SideGamePrototype
             this.spriteBatch.End();
 
             //Foreground
-            this.spriteBatch.Begin();
+            var viewMatrix = this.cam.GetViewMatrix();
+
+            this.spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: viewMatrix);
             this.mapRenderer.Draw(this.spriteBatch);
             this.entityList.ForEach(e => e.Draw(this.spriteBatch));
+
             this.spriteBatch.End();
 
             base.Draw(gameTime);

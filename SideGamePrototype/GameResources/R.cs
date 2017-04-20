@@ -32,6 +32,7 @@ namespace Resources
             public readonly TileMap Tiles;
 
             public Texture2D Red;
+            public Texture2D White;
 
             private Texture2D tileTexture;
             private Dictionary<Texture2D, Color[]> cachedPixelData = new Dictionary<Texture2D, Color[]>();
@@ -42,6 +43,7 @@ namespace Resources
                 this.Background = c.Load<Texture2D>("Background.png");
                 this.tileTexture = c.Load<Texture2D>("Resources.png");
                 this.Red = Texture2dHelper.CreateTexture(d, 10, 10, (_) => Color.Red);
+                this.White = Texture2dHelper.CreateTexture(d, 10, 10, (_) => Color.White);
                 this.Tiles = new TileMap(tileTexture);
             }
 
