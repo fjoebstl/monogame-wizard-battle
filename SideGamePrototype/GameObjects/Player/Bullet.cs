@@ -1,11 +1,19 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Resources;
 
-namespace SideGamePrototype.GameObjects.Player
+namespace SideGamePrototype
 {
     internal class Bullet : IEntity
     {
         public IRigidBody Body { get; private set; }
+
+        public bool Dead { get; private set; }
+
+        public Bullet(Vector2 pos)
+        {
+            this.Body = new RigidBody(pos, GetCurrentShape);
+        }
 
         public void Draw(SpriteBatch s)
         {
@@ -22,6 +30,12 @@ namespace SideGamePrototype.GameObjects.Player
         public void Update(float dt)
         {
             this.Body.Update(dt);
+
+            if (this.Body.LastCollisionResult.WasCollision)
+                this.Dead = true;
         }
+
+        private PixelShape GetCurrentShape()
+            => PixelShape.FromTile(R.Textures.Tiles.GetCollisionTileFromString(GetTileString()));
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Resources;
+using System;
 using System.Collections.Generic;
 
 namespace SideGamePrototype
@@ -38,18 +39,15 @@ namespace SideGamePrototype
 
             //init entities
             GameState.Entities = new EntityCollection();
-
-            var collision = new Collision(map, GameState.Entities);
+            GameState.Collision = new Collision(map, GameState.Entities);
 
             GameState.Entities.Add(new Wizard(
                 pos: new Vector2(100, 500),
-                input: new KeyboardLayout1InputHandler(),
-                collision: collision));
+                input: new KeyboardLayout1InputHandler()));
 
             GameState.Entities.Add(new Wizard(
                 pos: new Vector2(200, 500),
-                input: new KeyboardLayout2InputHandler(),
-                collision: collision));
+                input: new KeyboardLayout2InputHandler()));
         }
 
         protected override void UnloadContent()
@@ -78,6 +76,8 @@ namespace SideGamePrototype
 
             GameState.Camera.ZoomWidth(r.Width, 1.0f, 3.0f);
             //Camera TEST
+
+            //Console.WriteLine($"{Collision.a.ElapsedMilliseconds}ms {Collision.b.ElapsedMilliseconds}ms {Collision.c.ElapsedMilliseconds}ms");
 
             base.Update(gameTime);
         }

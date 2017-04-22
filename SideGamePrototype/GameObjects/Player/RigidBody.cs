@@ -13,8 +13,8 @@ namespace SideGamePrototype
         Vector2 Positon { get; set; }
         CollisionResult LastCollisionResult { get; }
 
-        void AddForce(string name, Vector2 f);
-        void AddVelocityComponent(string name, Vector2 f);
+        void AddForce(string name, Vector2 f, bool isConstant = false);
+        void AddVelocityComponent(string name, Vector2 f, bool isConstant = false);
         void Update(float dt);
     }
 
@@ -25,6 +25,7 @@ namespace SideGamePrototype
             public Vector2 acc = new Vector2();
             public Vector2 vel = new Vector2();
             public bool isVelocityComponent = false;
+            public bool isConstant = false;
         }
 
         public Vector2 Positon { get; set; }
@@ -39,28 +40,28 @@ namespace SideGamePrototype
 
         public PixelShape Shape => this.getCurrentShape();
 
-        private readonly ICollision collision;
         private readonly Func<PixelShape> getCurrentShape;
         private readonly Dictionary<string, ForceComponent> forces = new Dictionary<string, ForceComponent>();
 
-        public RigidBody(Vector2 position, Func<PixelShape> getCurrentShape, ICollision collision)
+        public RigidBody(Vector2 position, Func<PixelShape> getCurrentShape)
         {
             this.Positon = position;
-            this.collision = collision;
             this.getCurrentShape = getCurrentShape;
         }
 
-        public void AddForce(string name, Vector2 f)
+        public void AddForce(string name, Vector2 f, bool isConstant = false)
         {
             this.EnsureExists(name);
             this.forces[name].acc = f;
+            this.forces[name].isConstant = isConstant;
         }
 
-        public void AddVelocityComponent(string name, Vector2 f)
+        public void AddVelocityComponent(string name, Vector2 f, bool isConstant = false)
         {
             this.EnsureExists(name);
             this.forces[name].vel = f;
             this.forces[name].isVelocityComponent = true;
+            this.forces[name].isConstant = isConstant;
         }
 
         public void Update(float dt)
@@ -76,7 +77,7 @@ namespace SideGamePrototype
 
             do
             {
-                collResult = this.collision.Move(this, pos);
+                collResult = GameState.Collision.Move(this, pos);
 
                 if (collResult.WasCollision)
                     pos = this.Positon + (pos - this.Positon) / 2.0f;
@@ -98,7 +99,9 @@ namespace SideGamePrototype
             ResetForces(collResult);
 
             this.LastCollisionResult.CollisionPoints = collResult.CollisionPoints;
-            this.LastCollisionResult.StandsOnGround = this.collision.Move(this, this.Positon).StandsOnGround;
+
+            //ToDo: should not be calculated twice
+            this.LastCollisionResult.StandsOnGround = GameState.Collision.Move(this, this.Positon).StandsOnGround;
         }
 
         private void ResetForces(CollisionResult collResult)
@@ -106,7 +109,7 @@ namespace SideGamePrototype
             foreach (var force in this.forces.Values)
             {
                 force.acc = new Vector2();
-                if (collResult.WasCollision || force.isVelocityComponent)
+                if (collResult.WasCollision || (force.isVelocityComponent && !force.isConstant))
                 {
                     force.vel = new Vector2();
                 }

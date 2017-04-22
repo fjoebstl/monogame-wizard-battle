@@ -27,6 +27,9 @@ namespace SideGamePrototype
         {
             this.All.AddRange(this.toAdd);
             this.toAdd.Clear();
+
+            this.All = this.All.Where(e => !e.Dead).ToList();
+
             this.All.ForEach(e => e.Update(dt));
         }
 

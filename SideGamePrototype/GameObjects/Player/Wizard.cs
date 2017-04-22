@@ -2,25 +2,29 @@
 using Microsoft.Xna.Framework.Graphics;
 using Resources;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace SideGamePrototype
 {
     internal class Wizard : IEntity
     {
         public IRigidBody Body { get; private set; }
+        public bool Dead => false;
 
-        private DrawableState currentState;
+        private Stack<State> currentStates;
 
-        public Wizard(Vector2 pos, IInputHandler input, ICollision collision)
+        public Wizard(Vector2 pos, IInputHandler input)
         {
-            this.Body = new RigidBody(pos, GetCurrentShape, collision);
+            this.Body = new RigidBody(pos, GetCurrentShape);
 
             //States
             var walkingState = new WalkingState(Body, input);
             var fallingState = new FallingState(Body, input);
             var jumpingState = new JumpingState(Body, input);
             var diveState = new DiveDownState(Body, input);
+            var fireingState = new FireingState(Body, input);
 
             //Triggers
             var onGround = Trigger.From(() => this.Body.LastCollisionResult.StandsOnGround);
@@ -31,6 +35,7 @@ namespace SideGamePrototype
 
             var notJumpPressed = Trigger.From(() => !input.JumpPressed);
             var downPressed = Trigger.From(() => input.CrouchPressed);
+            var firePressed = Trigger.From(() => input.FirePressed);
 
             var jumpEnds = Trigger.Or(
                 Trigger.Delay(JumpingState.Duration),
@@ -42,15 +47,21 @@ namespace SideGamePrototype
             //Transitions
             walkingState.Add(notOnGround, () => fallingState);
             walkingState.Add(jumpReady, () => jumpingState);
+            walkingState.AddPush(firePressed, () => fireingState);
 
             fallingState.Add(onGround, () => walkingState);
             fallingState.Add(downPressed, () => diveState);
+            fallingState.AddPush(firePressed, () => fireingState);
 
             jumpingState.Add(jumpEnds, () => fallingState);
+            jumpingState.AddPush(firePressed, () => fireingState);
 
             diveState.Add(onGround, () => walkingState);
 
-            this.currentState = walkingState;
+            fireingState.AddPop(Trigger.Delay(0.2f));
+
+            this.currentStates = new Stack<State>();
+            this.currentStates.Push(walkingState);
         }
 
         public void Draw(SpriteBatch s)
@@ -63,12 +74,17 @@ namespace SideGamePrototype
             //}
             //DEBUG
 
-            this.currentState.Draw(s);
+            ((DrawableState)this.currentStates.Peek()).Draw(s);
         }
 
         public void Update(float dt)
         {
-            this.currentState = (DrawableState)this.currentState.Update(dt);
+            //Update all pushed down states (but no transitions are made; see -> State.Update)
+            var passive = this.currentStates.Reverse().Take(this.currentStates.Count - 1);
+            passive.ToList().ForEach(p => p.Update(dt));
+
+            //Get new states
+            this.currentStates = this.currentStates.Peek().Update(dt);
 
             var s = Stopwatch.StartNew();
             this.Body.Update(dt);
@@ -78,7 +94,7 @@ namespace SideGamePrototype
         }
 
         private PixelShape GetCurrentShape()
-            => PixelShape.FromTile(this.currentState.GetCollisionTile());
+            => PixelShape.FromTile(((DrawableState)this.currentStates.Peek()).GetCollisionTile());
     }
 
     internal class WalkingState : DrawableState
@@ -86,11 +102,11 @@ namespace SideGamePrototype
         private bool isMoving = false;
 
         public WalkingState(IRigidBody body, IInputHandler input)
-            : base(body, input)
+            : base(nameof(WalkingState), body, input)
         {
         }
 
-        public override State Update(float gt)
+        public override Stack<State> Update(float gt)
         {
             this.isMoving = this.body.AddMoveComponent(this.input, velocity: 3.0f);
 
@@ -104,11 +120,11 @@ namespace SideGamePrototype
     internal class FallingState : DrawableState
     {
         public FallingState(IRigidBody body, IInputHandler input)
-            : base(body, input)
+            : base(nameof(FallingState), body, input)
         {
         }
 
-        public override State Update(float gt)
+        public override Stack<State> Update(float gt)
         {
             this.body.AddForce("g", new Vector2(0, 3.5f));
             this.body.AddMoveComponent(this.input, velocity: 1.0f);
@@ -129,7 +145,7 @@ namespace SideGamePrototype
         private float elapsed = 0.0f;
 
         public JumpingState(IRigidBody body, IInputHandler input)
-            : base(body, input)
+            : base(nameof(JumpingState), body, input)
         {
         }
 
@@ -139,7 +155,7 @@ namespace SideGamePrototype
             base.OnEnter();
         }
 
-        public override State Update(float gt)
+        public override Stack<State> Update(float gt)
         {
             this.elapsed += gt;
 
@@ -159,11 +175,11 @@ namespace SideGamePrototype
     internal class DiveDownState : DrawableState
     {
         public DiveDownState(IRigidBody body, IInputHandler input)
-            : base(body, input)
+            : base(nameof(DiveDownState), body, input)
         {
         }
 
-        public override State Update(float gt)
+        public override Stack<State> Update(float gt)
         {
             this.body.AddForce("g", new Vector2(0, 3.5f));
             this.body.AddVelocityComponent("downforce", new Vector2(0, 3));
@@ -175,17 +191,47 @@ namespace SideGamePrototype
             => "3,E";
     }
 
+    internal class FireingState : DrawableState
+    {
+        public FireingState(IRigidBody body, IInputHandler input)
+            : base(nameof(FireingState), body, input)
+        {
+        }
+
+        public override void OnExit()
+        {
+            var pos = this.body.Positon + this.body.LookAt * 10.0f;
+            var b = new Bullet(pos);
+            b.Body.AddVelocityComponent("b", this.body.LookAt, isConstant: true);
+
+            GameState.Entities.Add(b);
+            base.OnExit();
+        }
+
+        public override Stack<State> Update(float gt)
+        {
+            return base.Update(gt);
+        }
+
+        protected override string GetTileString()
+            => "3,B";
+    }
+
+    [DebuggerDisplay("{name}")]
     internal abstract class DrawableState : State
     {
+        private string name;
+
         protected readonly IRigidBody body;
         protected readonly IInputHandler input;
 
         protected abstract string GetTileString();
 
-        public DrawableState(IRigidBody body, IInputHandler input)
+        public DrawableState(string name, IRigidBody body, IInputHandler input)
         {
             this.body = body;
             this.input = input;
+            this.name = name;
         }
 
         public void Draw(SpriteBatch s)
@@ -194,6 +240,11 @@ namespace SideGamePrototype
             t.Draw(s, this.body.Positon, this.body.LookAt.X > 0
                 ? SpriteEffects.FlipHorizontally
                 : SpriteEffects.None);
+        }
+
+        public override Stack<State> Update(float gt)
+        {
+            return base.Update(gt);
         }
 
         public Tile GetTile()

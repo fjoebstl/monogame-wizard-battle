@@ -15,5 +15,6 @@ namespace SideGamePrototype
     internal interface IEntity : IUpdate, IDraw
     {
         IRigidBody Body { get; }
+        bool Dead { get; }
     }
 }
