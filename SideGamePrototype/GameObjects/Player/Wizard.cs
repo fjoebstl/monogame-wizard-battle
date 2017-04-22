@@ -39,6 +39,7 @@ namespace SideGamePrototype
                     Trigger.Delay(0.2f),
                     Trigger.From(() => this.Body.LastCollisionResult.WasCollision)));
 
+            //Transitions
             walkingState.Add(notOnGround, () => fallingState);
             walkingState.Add(jumpReady, () => jumpingState);
 

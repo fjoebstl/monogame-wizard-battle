@@ -26,9 +26,9 @@ namespace SideGamePrototype
     internal class Collision : ICollision
     {
         private readonly GameMap map;
-        private readonly List<IEntity> entities;
+        private readonly IEntityCollection entities;
 
-        public Collision(GameMap map, List<IEntity> entities)
+        public Collision(GameMap map, IEntityCollection entities)
         {
             this.map = map;
             this.entities = entities;
@@ -56,7 +56,7 @@ namespace SideGamePrototype
                 .SelectMany(p => TileCharToPoints(GetTileCharAt(p), p))
                 .Select(x => x.ToPoint());
 
-            var entities = this.entities
+            var entities = this.entities.All
                 .Where(e => e.Body != body && e.Body.BoundingBox.Intersects(body.BoundingBox))
                 .SelectMany(e => Translate(e.Body.Shape.SolidPixels, e.Body.Positon))
                 .Select(x => x.ToPoint());

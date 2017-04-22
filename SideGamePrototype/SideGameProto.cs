@@ -10,8 +10,6 @@ namespace SideGamePrototype
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
         private GameMapRenderer mapRenderer;
-        private List<IEntity> entityList = new List<IEntity>();
-        private Camera2D cam;
 
         public SideGameProto()
         {
@@ -32,19 +30,23 @@ namespace SideGamePrototype
             R.System.ToWindow();
 
             //init camera
-            this.cam = new Camera2D(graphics.GraphicsDevice.Viewport);
+            GameState.Camera = new Camera2D(graphics.GraphicsDevice.Viewport);
 
-            //create game map + player
+            //create game map
             var map = GameMapMirrorReader.FromFile(@"Content/Game.txt");
             this.mapRenderer = new GameMapRenderer(map);
-            var collision = new Collision(map, this.entityList);
 
-            this.entityList.Add(new Wizard(
+            //init entities
+            GameState.Entities = new EntityCollection();
+
+            var collision = new Collision(map, GameState.Entities);
+
+            GameState.Entities.Add(new Wizard(
                 pos: new Vector2(100, 500),
                 input: new KeyboardLayout1InputHandler(),
                 collision: collision));
 
-            this.entityList.Add(new Wizard(
+            GameState.Entities.Add(new Wizard(
                 pos: new Vector2(200, 500),
                 input: new KeyboardLayout2InputHandler(),
                 collision: collision));
@@ -59,22 +61,22 @@ namespace SideGamePrototype
         {
             float dt = (float)gameTime.ElapsedGameTime.TotalMilliseconds / 1000.0f;
 
-            this.entityList.ForEach(e => e.Update(dt));
+            GameState.Entities.Update(dt);
 
             //Camera TEST
-            var w1 = this.entityList[0];
-            var w2 = this.entityList[1];
+            var w1 = GameState.Entities.All[0];
+            var w2 = GameState.Entities.All[1];
 
             var origin = w1.Body.Positon - (w1.Body.Positon - w2.Body.Positon) / 2.0f;
 
-            this.cam.Position = origin - new Vector2(
+            GameState.Camera.Position = origin - new Vector2(
                 this.graphics.GraphicsDevice.Viewport.Width,
                 this.graphics.GraphicsDevice.Viewport.Height) / 2.0f;
 
             var r = MathUtil.Union(w1.Body.BoundingBox, w2.Body.BoundingBox);
             r.Inflate(200, 100);
 
-            this.cam.ZoomWidth(r.Width, 1.0f, 3.0f);
+            GameState.Camera.ZoomWidth(r.Width, 1.0f, 3.0f);
             //Camera TEST
 
             base.Update(gameTime);
@@ -90,11 +92,11 @@ namespace SideGamePrototype
             this.spriteBatch.End();
 
             //Foreground
-            var viewMatrix = this.cam.GetViewMatrix();
+            var viewMatrix = GameState.Camera.GetViewMatrix();
 
             this.spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: viewMatrix);
             this.mapRenderer.Draw(this.spriteBatch);
-            this.entityList.ForEach(e => e.Draw(this.spriteBatch));
+            GameState.Entities.Draw(this.spriteBatch);
 
             this.spriteBatch.End();
 

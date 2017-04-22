@@ -38,10 +38,13 @@
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="GameObjects\Player\Bullet.cs" />
     <Compile Include="System\Camera2d.cs" />
     <Compile Include="System\Collision.cs" />
     <Compile Include="GameObjects\GameMap.cs" />
     <Compile Include="GameObjects\IEntity.cs" />
+    <Compile Include="System\EntityCollection.cs" />
+    <Compile Include="System\GameState.cs" />
     <Compile Include="System\InputHandler.cs" />
     <Compile Include="GameObjects\Player\RigidBody.cs" />
     <Compile Include="GameObjects\Player\State.cs" />
