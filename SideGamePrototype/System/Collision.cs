@@ -50,7 +50,7 @@ namespace SideGamePrototype
             var selfV = Translate(body.BoundingBox, offV);
             if (hitV != Rectangle.Empty)
             {
-                yoff = selfV.Y < hitV.Y ? selfV.Bottom - hitV.Top : selfV.Top - hitV.Bottom;
+                yoff = selfV.Y <= hitV.Y ? selfV.Bottom - hitV.Top : selfV.Top - hitV.Bottom;
             }
 
             //Horizontal
