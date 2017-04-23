@@ -38,26 +38,26 @@
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="GameObjects\Player\Bullet.cs" />
-    <Compile Include="GameObjects\Tiles\Tile.cs" />
+    <Compile Include="Objects\Bullet.cs" />
+    <Compile Include="Tiles\Tile.cs" />
     <Compile Include="System\Camera\Camera2d.cs" />
     <Compile Include="System\Camera\ZoomingCamera.cs" />
     <Compile Include="System\Collision.cs" />
-    <Compile Include="GameObjects\Tiles\GameMap.cs" />
-    <Compile Include="GameObjects\IEntity.cs" />
-    <Compile Include="System\EntityCollection.cs" />
+    <Compile Include="Tiles\GameMap.cs" />
+    <Compile Include="Entity\IEntity.cs" />
+    <Compile Include="Entity\EntityCollection.cs" />
     <Compile Include="System\GameState.cs" />
     <Compile Include="System\InputHandler.cs" />
-    <Compile Include="GameObjects\Player\RigidBody.cs" />
-    <Compile Include="GameObjects\Player\State.cs" />
-    <Compile Include="GameObjects\Player\Triggers.cs" />
-    <Compile Include="GameObjects\Player\Wizard.cs" />
-    <Compile Include="GameResources\Texture2dHelper.cs" />
+    <Compile Include="Entity\RigidBody.cs" />
+    <Compile Include="Entity\State.cs" />
+    <Compile Include="Entity\Triggers.cs" />
+    <Compile Include="Objects\Wizard.cs" />
+    <Compile Include="Resources\Texture2dHelper.cs" />
     <Compile Include="SideGameProto.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="GameResources\R.cs" />
-    <Compile Include="GameObjects\Tiles\TileCollection.cs" />
+    <Compile Include="Resources\R.cs" />
+    <Compile Include="Tiles\TileCollection.cs" />
     <Compile Include="System\MathUtil.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -11,6 +11,9 @@ namespace SideGamePrototype
 
     public class Tile
     {
+        private static readonly Color DEBUG_SOLID = Color.FromNonPremultiplied(0, 0, 255, 200);
+        private static readonly Color DEBUG_YPASS = Color.FromNonPremultiplied(0, 255, 0, 200);
+
         private readonly TextureInfo t;
         private readonly Rectangle r;
 
@@ -47,15 +50,36 @@ namespace SideGamePrototype
         }
 
         public void Draw(SpriteBatch s, Rectangle destination, SpriteEffects eff = SpriteEffects.None)
-            => s.Draw(
-                texture: this.t.Texture,
-                destinationRectangle: destination,
-                sourceRectangle: r,
-                color: Color.White,
-                rotation: 0.0f,
-                origin: new Vector2(),
-                effects: eff,
-                layerDepth: 1.0f);
+        {
+            s.Draw(
+                  texture: this.t.Texture,
+                  destinationRectangle: destination,
+                  sourceRectangle: r,
+                  color: Color.White,
+                  rotation: 0.0f,
+                  origin: new Vector2(),
+                  effects: eff,
+                  layerDepth: 1.0f);
+
+            //DEBUG
+            if (GameState.DEBUG)
+            {
+                s.Draw(
+                 texture: R.Textures.White,
+                 destinationRectangle: new Rectangle(
+                     destination.X + this.CollisionBox.X,
+                     destination.Y + this.CollisionBox.Y,
+                     this.CollisionBox.Width,
+                     this.CollisionBox.Height),
+                 sourceRectangle: r,
+                 color: this.CollisionType == CollisionType.Solid ? DEBUG_SOLID : Color.Transparent,
+                 rotation: 0.0f,
+                 origin: new Vector2(),
+                 effects: eff,
+                 layerDepth: 1.0f);
+            }
+            //DEBUG
+        }
 
         private void SetCollisionAttributes()
         {
@@ -95,7 +119,7 @@ namespace SideGamePrototype
                 return;
             }
 
-            this.CollisionBox = new Rectangle(l, t, r - l, b - t);
+            this.CollisionBox = new Rectangle(l, t, r - l + 1, b - t + 1);
             this.CollisionType = shapeColor.B > shapeColor.R ? CollisionType.Solid : CollisionType.YPassable;
         }
     }

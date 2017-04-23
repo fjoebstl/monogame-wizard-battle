@@ -67,7 +67,7 @@ namespace SideGamePrototype
         public void Draw(SpriteBatch s)
         {
             //DEBUG
-            if (this.Body.LastCollisionResult.WasCollision)
+            if (GameState.DEBUG && this.Body.LastCollisionResult.WasCollision)
             {
                 var b = this.Body.BoundingBox;
                 s.Draw(R.Textures.Red, b, Color.White);

@@ -67,10 +67,10 @@ namespace SideGamePrototype
         {
             this.Shape = this.getCurrentShape();
             this.BoundingBox = new Rectangle(
-           (int)this.Positon.X,
-           (int)this.Positon.Y,
-           (int)this.Shape.Size.X,
-           (int)this.Shape.Size.Y);
+               (int)this.Positon.X,
+               (int)this.Positon.Y,
+               (int)this.Shape.Size.X,
+               (int)this.Shape.Size.Y);
 
             var pos = this.Positon;
             foreach (var force in this.forces.Values)
@@ -89,10 +89,7 @@ namespace SideGamePrototype
                 this.LastCollisionResult = collResult;
             }
 
-            ResetForces(this.LastCollisionResult);
-
-            //ToDo: should not be calculated twice
-            //this.LastCollisionResult.StandsOnGround = collResult.StandsOnGround;//GameState.Collision.Move(this, this.Positon).StandsOnGround;
+            this.ResetForces(this.LastCollisionResult);
         }
 
         private void ResetForces(CollisionResult collResult)

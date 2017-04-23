@@ -8,7 +8,6 @@ namespace SideGamePrototype
     internal class Bullet : IEntity
     {
         public IRigidBody Body { get; private set; }
-
         public bool Dead { get; private set; }
 
         public Bullet(Vector2 pos)
@@ -34,7 +33,8 @@ namespace SideGamePrototype
 
             if (this.Body.LastCollisionResult.WasCollision)
             {
-                var w = this.Body.LastCollisionResult.EntityCollisions.Where(e => e is Wizard).FirstOrDefault() as Wizard;
+                var w = this.Body.LastCollisionResult
+                    .EntityCollisions.Where(e => e is Wizard).FirstOrDefault() as Wizard;
                 if (w != null)
                     w.Hit();
 
