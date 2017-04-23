@@ -93,8 +93,8 @@ namespace SideGamePrototype
             //Console.WriteLine(s.ElapsedMilliseconds);
         }
 
-        private PixelShape GetCurrentShape()
-            => PixelShape.FromTile(((DrawableState)this.currentStates.Peek()).GetCollisionTile());
+        private Tile GetCurrentShape()
+            => ((DrawableState)this.currentStates.Peek()).GetTile();
     }
 
     internal class WalkingState : DrawableState
@@ -249,9 +249,6 @@ namespace SideGamePrototype
 
         public Tile GetTile()
             => R.Textures.Tiles.GetTileFromString(this.GetTileString());
-
-        public Tile GetCollisionTile()
-            => R.Textures.Tiles.GetCollisionTileFromString(this.GetTileString());
     }
 
     internal static class RigidBodyEx

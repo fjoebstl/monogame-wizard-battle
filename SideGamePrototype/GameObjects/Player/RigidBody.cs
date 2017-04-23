@@ -7,7 +7,7 @@ namespace SideGamePrototype
     internal interface IRigidBody
     {
         Rectangle BoundingBox { get; }
-        PixelShape Shape { get; }
+        Tile Shape { get; }
 
         Vector2 LookAt { get; set; }
         Vector2 Positon { get; set; }
@@ -37,12 +37,12 @@ namespace SideGamePrototype
 
         public Rectangle BoundingBox { get; private set; } = new Rectangle();
 
-        public PixelShape Shape { get; private set; }
+        public Tile Shape { get; private set; }
 
-        private readonly Func<PixelShape> getCurrentShape;
+        private readonly Func<Tile> getCurrentShape;
         private readonly Dictionary<string, ForceComponent> forces = new Dictionary<string, ForceComponent>();
 
-        public RigidBody(Vector2 position, Func<PixelShape> getCurrentShape)
+        public RigidBody(Vector2 position, Func<Tile> getCurrentShape)
         {
             this.Positon = position;
             this.getCurrentShape = getCurrentShape;
@@ -135,21 +135,6 @@ namespace SideGamePrototype
             {
                 this.forces.Add(name, new ForceComponent());
             }
-        }
-    }
-
-    public class PixelShape
-    {
-        public IEnumerable<Point> SolidPixels { get; set; }
-        public Vector2 Size { get; set; }
-
-        public static PixelShape FromTile(Tile t)
-        {
-            return new PixelShape()
-            {
-                Size = t.Size,
-                SolidPixels = t.GetSolidPoints(),
-            };
         }
     }
 }

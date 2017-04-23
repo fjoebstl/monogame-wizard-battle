@@ -6,75 +6,22 @@ using System.Collections.Generic;
 
 namespace SideGamePrototype
 {
-    public class Tile
+    public interface ITileMap
     {
-        private readonly Texture2D t;
-        private readonly Rectangle r;
+        Tile GetTileFromChar(char ch);
+        Tile GetTileFromString(string resKey);
 
-        public Vector2 Size => new Vector2(r.Width, r.Height);
-
-        public Tile(Texture2D t, Rectangle r)
-        {
-            this.t = t;
-            this.r = r;
-        }
-
-        public void DrawInTileCoordinates(SpriteBatch s, Vector2 tileCoordinates, SpriteEffects eff = SpriteEffects.None)
-        {
-            var dest = new Rectangle(
-                   (int)tileCoordinates.X * r.Width,
-                   (int)tileCoordinates.Y * r.Height,
-                   r.Width,
-                   r.Height);
-            this.Draw(s, dest, eff);
-        }
-
-        public void Draw(SpriteBatch s, Vector2 d, SpriteEffects eff = SpriteEffects.None)
-        {
-            var dest = new Rectangle((int)d.X, (int)d.Y, r.Width, r.Height);
-            this.Draw(s, dest, eff);
-        }
-
-        public void Draw(SpriteBatch s, Rectangle destination, SpriteEffects eff = SpriteEffects.None)
-            => s.Draw(
-                texture: this.t,
-                destinationRectangle: destination,
-                sourceRectangle: r,
-                color: Color.White,
-                rotation: 0.0f,
-                origin: new Vector2(),
-                effects: eff,
-                layerDepth: 1.0f);
-
-        public Point[] GetSolidPoints()
-        {
-            //Get all pixels of image which are not fully transparent
-
-            var l = new List<Point>();
-            var raw = R.Textures.GetPixels(this.t);
-
-            for (int x = 0; x < this.r.Width; x++)
-            {
-                for (int y = 0; y < this.r.Y; y++)
-                {
-                    var pixel = raw.GetPixel(this.r.X + x, this.r.Y + y, this.t.Width);
-                    if (pixel.A > 0.0f)
-                    {
-                        l.Add(new Point(x, y));
-                    }
-                }
-            }
-
-            return l.ToArray();
-        }
+        void Load(Texture2D texture, int tileSize);
     }
 
-    public class TileMap
+    public class TextureInfo
     {
-        private static readonly int tileSize = 16;
+        public Texture2D Texture { get; set; }
+        public Color[] Raw { get; set; }
+    }
 
-        private readonly Texture2D t;
-
+    public class TileMap : ITileMap
+    {
         private Dictionary<char, string> tileMapping = new Dictionary<char, string>()
         {
             //See Content\Game.txt for map characters
@@ -85,11 +32,38 @@ namespace SideGamePrototype
             { '§', "1,D" },
         };
 
-        private Dictionary<Rectangle, Tile> cache = new Dictionary<Rectangle, Tile>();
+        private Dictionary<string, Tile> cache = new Dictionary<string, Tile>();
 
-        public TileMap(Texture2D t)
+        public void Load(Texture2D texture, int tileSize)
         {
-            this.t = t;
+            var maxX = texture.Width / tileSize;
+            var maxY = texture.Height / tileSize - 1;
+
+            var info = new TextureInfo()
+            {
+                Texture = texture,
+                Raw = texture.GetPixels(),
+            };
+
+            //Range:
+            //starts at 1,1 because  first row and coll  contains grid descritions in image
+            //see: Resources.pdn layers
+            //Increment:
+            //Only scan every second row because row below tiles contain collision information
+            //read by tile.
+            for (int y = 1; y < maxY; y += 2)
+            {
+                for (int x = 1; x < maxX; x++)
+                {
+                    var tile = new Tile(info, new Rectangle(x * tileSize, y * tileSize, tileSize, tileSize));
+                    tile.Name = $"{y},{(char)('A' - 1 + x)}";
+
+                    if (!tile.IsEmpty)
+                    {
+                        this.cache.Add(tile.Name, tile);
+                    }
+                }
+            }
         }
 
         public Tile GetTileFromChar(char ch)
@@ -100,38 +74,9 @@ namespace SideGamePrototype
             return GetTileFromString(tileMapping[ch]);
         }
 
-        public Tile GetCollisionTileFromChar(char ch)
-        {
-            if (!tileMapping.ContainsKey(ch))
-                return null;
-
-            return GetCollisionTileFromString(tileMapping[ch]);
-        }
-
         public Tile GetTileFromString(string resKey)
-            => this.GetTileFromString(resKey, t => t);
-
-        public Tile GetCollisionTileFromString(string resKey)
-            => this.GetTileFromString(resKey, t => t + new Vector2(0, 1));
-
-        private Tile GetTileFromString(string resKey, Func<Vector2, Vector2> trans)
         {
-            var r = VecToRec(trans(StrToVec(resKey)));
-            if (!this.cache.ContainsKey(r))
-            {
-                this.cache.Add(r, new Tile(this.t, r));
-            }
-            return this.cache[r];
+            return this.cache[resKey];
         }
-
-        private static Vector2 StrToVec(string s)
-        {
-            var y = int.Parse(s.Split(',')[0]);
-            var x = char.Parse(s.Split(',')[1]) - 'A' + 1;
-            return new Vector2(x, y);
-        }
-
-        private static Rectangle VecToRec(Vector2 v)
-            => new Rectangle((int)v.X * tileSize, (int)v.Y * tileSize, tileSize, tileSize);
     }
 }

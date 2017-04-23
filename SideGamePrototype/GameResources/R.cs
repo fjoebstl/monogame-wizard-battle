@@ -3,9 +3,6 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using SideGamePrototype;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace Resources
@@ -29,13 +26,12 @@ namespace Resources
         public class T : IDisposable
         {
             public readonly Texture2D Background;
-            public readonly TileMap Tiles;
+            public readonly ITileMap Tiles;
 
             public Texture2D Red;
             public Texture2D White;
 
             private Texture2D tileTexture;
-            private Dictionary<Texture2D, Color[]> cachedPixelData = new Dictionary<Texture2D, Color[]>();
 
             public T(GraphicsDevice d, ContentManager c)
             {
@@ -44,17 +40,9 @@ namespace Resources
                 this.tileTexture = c.Load<Texture2D>("Resources.png");
                 this.Red = Texture2dHelper.CreateTexture(d, 10, 10, (_) => Color.Red);
                 this.White = Texture2dHelper.CreateTexture(d, 10, 10, (_) => Color.White);
-                this.Tiles = new TileMap(tileTexture);
-            }
 
-            public Color[] GetPixels(Texture2D t)
-            {
-                if (!this.cachedPixelData.ContainsKey(t))
-                {
-                    this.cachedPixelData[t] = t.GetPixels();
-                }
-
-                return this.cachedPixelData[t];
+                this.Tiles = new TileMap();
+                this.Tiles.Load(texture: this.tileTexture, tileSize: 16);
             }
 
             public void Dispose()

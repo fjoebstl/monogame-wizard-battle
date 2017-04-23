@@ -53,40 +53,43 @@ namespace SideGamePrototype
 
         private CollisionResult Collides(IRigidBody body)
         {
-            //Points to test
-            var test = Translate(body.Shape.SolidPixels, body.Positon);
+            throw new NotImplementedException();
+            ////Points to test
+            //var test = Translate(body.Shape.SolidPixels, body.Positon);
 
-            //Collect all tile and entity points
-            var tiles = GetEdgePoints(body.BoundingBox)
-                .SelectMany(p => TileCharToPoints(GetTileCharAt(p), p));
+            ////Collect all tile and entity points
+            //var tiles = GetEdgePoints(body.BoundingBox)
+            //    .SelectMany(p => TileCharToPoints(GetTileCharAt(p), p));
 
-            var entities = this.entities.All
-                .Where(e => e.Body != body && e.Body.BoundingBox.Intersects(body.BoundingBox))
-                .SelectMany(e => Translate(e.Body.Shape.SolidPixels, e.Body.Positon.ToPoint()));
+            //var entities = this.entities.All
+            //    .Where(e => e.Body != body && e.Body.BoundingBox.Intersects(body.BoundingBox))
+            //    .SelectMany(e => Translate(e.Body.Shape.SolidPixels, e.Body.Positon.ToPoint()));
 
-            var all = tiles.Union(entities);
+            //var all = tiles.Union(entities);
 
-            //Test collision
-            var r = all.Intersect(test);
+            ////Test collision
+            //var r = all.Intersect(test);
 
-            //Test if body on ground
-            var origin = body.BoundingBox.Center;
-            var rOnGround = all.Intersect(Translate(test, new Point(0, 1)));
-            var onGround = rOnGround.Any() && rOnGround.Any(p => p.Y > origin.Y);
+            ////Test if body on ground
+            //var origin = body.BoundingBox.Center;
+            //var rOnGround = all.Intersect(Translate(test, new Point(0, 1)));
+            //var onGround = rOnGround.Any() && rOnGround.Any(p => p.Y > origin.Y);
 
-            return new CollisionResult() { CollisionPoints = r.ToList(), StandsOnGround = onGround };
+            //return new CollisionResult() { CollisionPoints = r.ToList(), StandsOnGround = onGround };
         }
 
         private IEnumerable<Point> TileCharToPoints(char tileChar, Vector2 p)
         {
-            if (tileChar == ' ')
-                return new List<Point>();
+            //if (tileChar == ' ')
+            //    return new List<Point>();
 
-            var solidPoints = R.Textures.Tiles.GetCollisionTileFromChar(tileChar).GetSolidPoints();
-            var tileTopLeft = new Point((int)(p.X / 16) * 16, (int)(p.Y / 16) * 16);
-            var trans = Translate(solidPoints, tileTopLeft);
+            //var solidPoints = R.Textures.Tiles.GetCollisionTileFromChar(tileChar).GetSolidPoints();
+            //var tileTopLeft = new Point((int)(p.X / 16) * 16, (int)(p.Y / 16) * 16);
+            //var trans = Translate(solidPoints, tileTopLeft);
 
-            return trans;
+            //return trans;
+
+            throw new NotImplementedException();
         }
 
         private char GetTileCharAt(Vector2 p)

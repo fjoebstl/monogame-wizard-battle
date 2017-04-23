@@ -35,7 +35,7 @@ namespace SideGamePrototype
                 this.Dead = true;
         }
 
-        private PixelShape GetCurrentShape()
-            => PixelShape.FromTile(R.Textures.Tiles.GetCollisionTileFromString(GetTileString()));
+        private Tile GetCurrentShape()
+            => R.Textures.Tiles.GetTileFromString(GetTileString());
     }
 }

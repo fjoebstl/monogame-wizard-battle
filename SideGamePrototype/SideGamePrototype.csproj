@@ -39,6 +39,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="GameObjects\Player\Bullet.cs" />
+    <Compile Include="GameObjects\Tile.cs" />
     <Compile Include="System\Camera2d.cs" />
     <Compile Include="System\Collision.cs" />
     <Compile Include="GameObjects\GameMap.cs" />
