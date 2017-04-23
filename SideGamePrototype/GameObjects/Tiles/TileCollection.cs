@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace SideGamePrototype
 {
-    public interface ITileMap
+    public interface ITileCollection
     {
         Tile GetTileFromChar(char ch);
         Tile GetTileFromString(string resKey);
@@ -20,7 +20,7 @@ namespace SideGamePrototype
         public Color[] Raw { get; set; }
     }
 
-    public class TileMap : ITileMap
+    public class TileCollection : ITileCollection
     {
         private Dictionary<char, string> tileMapping = new Dictionary<char, string>()
         {

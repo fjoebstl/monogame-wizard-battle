@@ -81,37 +81,15 @@ namespace SideGamePrototype
 
             this.Velocity = pos - this.Positon;
 
-            CollisionResult collResult = new CollisionResult();
+            var collResult = GameState.Collision.Move(this, pos);
 
-            do
+            if (collResult != null)
             {
-                collResult = GameState.Collision.Move(this, pos);
-                if (collResult == null)
-                {
-                    collResult = this.LastCollisionResult;
-                    break;
-                }
-
-                if (collResult.WasCollision)
-                    pos = this.Positon + (pos - this.Positon) / 2.0f;
-            } while (collResult.WasCollision && Math.Abs((pos - this.Positon).Length()) > 0.5f);
-
-            //collResult = this.collision.Move(this, pos);
-            //if (collResult.WasCollision)
-            //{
-            //    pos = this.Positon - (pos - this.Positon) / 2.0f;
-            //    ResetForces(collResult);
-            //    collResult = this.collision.Move(this, pos);
-            //}
-
-            if (!collResult.WasCollision)
-            {
-                this.Positon = pos;
+                this.Positon = collResult.AvailablePosition;
+                this.LastCollisionResult = collResult;
             }
 
-            ResetForces(collResult);
-
-            this.LastCollisionResult = collResult;
+            ResetForces(this.LastCollisionResult);
 
             //ToDo: should not be calculated twice
             //this.LastCollisionResult.StandsOnGround = collResult.StandsOnGround;//GameState.Collision.Move(this, this.Positon).StandsOnGround;

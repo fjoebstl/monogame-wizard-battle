@@ -26,7 +26,7 @@ namespace Resources
         public class T : IDisposable
         {
             public readonly Texture2D Background;
-            public readonly ITileMap Tiles;
+            public readonly ITileCollection Tiles;
 
             public Texture2D Red;
             public Texture2D White;
@@ -41,7 +41,7 @@ namespace Resources
                 this.Red = Texture2dHelper.CreateTexture(d, 10, 10, (_) => Color.Red);
                 this.White = Texture2dHelper.CreateTexture(d, 10, 10, (_) => Color.White);
 
-                this.Tiles = new TileMap();
+                this.Tiles = new TileCollection();
                 this.Tiles.Load(texture: this.tileTexture, tileSize: 16);
             }
 

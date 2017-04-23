@@ -13,15 +13,9 @@ namespace SideGamePrototype
 
     internal class CollisionResult
     {
-        public List<Point> CollisionPoints { get; set; } = new List<Point>();
-        public bool WasCollision => this.CollisionPoints.Any();
+        public bool WasCollision { get; set; }
         public bool StandsOnGround { get; set; } = false;
-
-        public void Add(CollisionResult collResult)
-        {
-            this.CollisionPoints.AddRange(collResult.CollisionPoints);
-            this.StandsOnGround = collResult.StandsOnGround;
-        }
+        public Vector2 AvailablePosition { get; set; }
     }
 
     internal class Collision : ICollision
@@ -37,72 +31,78 @@ namespace SideGamePrototype
 
         public CollisionResult Move(IRigidBody body, Vector2 targetPosition)
         {
-            var tt = new Point((int)Math.Round(targetPosition.X), (int)Math.Round(targetPosition.Y));
+            int yoff = 0;
+            int xoff = 0;
 
-            if (body.Positon.ToPoint().Equals(tt))
-                return null;
+            //Vertical
+            var targetPointV = new Point((int)body.Positon.X, (int)targetPosition.Y);
 
-            var oldPosition = body.Positon;
+            var hitV = Collides(body, targetPointV);
+            var selfV = Translate(body.Shape.CollisionBox, targetPointV);
+            if (hitV != Rectangle.Empty)
+            {
+                yoff = selfV.Y < hitV.Y ? selfV.Bottom - hitV.Top : selfV.Top - hitV.Bottom;
+            }
 
-            body.Positon = targetPosition;
-            var r = Collides(body);
-            body.Positon = oldPosition;
+            //Horizontal
+            var targetPointH = new Point((int)targetPosition.X, (int)targetPosition.Y - yoff);
+            var hitH = Collides(body, targetPointH);
+            var selfH = Translate(body.Shape.CollisionBox, targetPointH);
+            if (hitH != Rectangle.Empty)
+            {
+                xoff = selfH.X < hitH.X ? selfH.Right - hitH.Left : selfH.Left - selfH.Right;
+            }
+
+            var onGround = Collides(body, targetPointV + new Point(xoff, yoff + 1)) != Rectangle.Empty;
+
+            var r = new CollisionResult();
+            r.AvailablePosition = targetPosition - new Vector2(xoff, yoff);
+            r.WasCollision = hitV != Rectangle.Empty || hitH != Rectangle.Empty;
+            r.StandsOnGround = onGround;
 
             return r;
         }
 
-        private CollisionResult Collides(IRigidBody body)
+        private Rectangle Collides(IRigidBody body, Point targetPosition)
         {
-            throw new NotImplementedException();
-            ////Points to test
-            //var test = Translate(body.Shape.SolidPixels, body.Positon);
+            var hitRect = Translate(body.Shape.CollisionBox, targetPosition);
 
-            ////Collect all tile and entity points
-            //var tiles = GetEdgePoints(body.BoundingBox)
-            //    .SelectMany(p => TileCharToPoints(GetTileCharAt(p), p));
+            foreach (var p in GetEdgePoints(hitRect))
+            {
+                var tileChar = GetTileCharAt(p);
+                if (tileChar != ' ')
+                {
+                    var tile = R.Textures.Tiles.GetTileFromChar(tileChar);
+                    var tileTopLeft = new Point((int)(p.X / 16) * 16, (int)(p.Y / 16) * 16);
+                    if (tile.CollisionType == CollisionType.Solid)
+                    {
+                        var translatedOther = Translate(tile.CollisionBox, tileTopLeft);
 
-            //var entities = this.entities.All
-            //    .Where(e => e.Body != body && e.Body.BoundingBox.Intersects(body.BoundingBox))
-            //    .SelectMany(e => Translate(e.Body.Shape.SolidPixels, e.Body.Positon.ToPoint()));
+                        if (hitRect.Intersects(translatedOther))
+                        {
+                            return translatedOther;
+                        }
+                    }
+                }
+            }
 
-            //var all = tiles.Union(entities);
+            foreach (var otherEntity in this.entities.All.Where(e => e.Body != body && e.Body.Shape != null))
+            {
+                var translatedOther = Translate(otherEntity.Body.Shape.CollisionBox, otherEntity.Body.Positon.ToPoint());
+                if (hitRect.Intersects(translatedOther))
+                {
+                    return translatedOther;
+                }
+            }
 
-            ////Test collision
-            //var r = all.Intersect(test);
-
-            ////Test if body on ground
-            //var origin = body.BoundingBox.Center;
-            //var rOnGround = all.Intersect(Translate(test, new Point(0, 1)));
-            //var onGround = rOnGround.Any() && rOnGround.Any(p => p.Y > origin.Y);
-
-            //return new CollisionResult() { CollisionPoints = r.ToList(), StandsOnGround = onGround };
-        }
-
-        private IEnumerable<Point> TileCharToPoints(char tileChar, Vector2 p)
-        {
-            //if (tileChar == ' ')
-            //    return new List<Point>();
-
-            //var solidPoints = R.Textures.Tiles.GetCollisionTileFromChar(tileChar).GetSolidPoints();
-            //var tileTopLeft = new Point((int)(p.X / 16) * 16, (int)(p.Y / 16) * 16);
-            //var trans = Translate(solidPoints, tileTopLeft);
-
-            //return trans;
-
-            throw new NotImplementedException();
+            return Rectangle.Empty;
         }
 
         private char GetTileCharAt(Vector2 p)
             => this.map.Data[(int)(p.X / 16), (int)(p.Y / 16)];
 
-        private IEnumerable<Vector2> Translate(IEnumerable<Vector2> o, Vector2 off)
-            => o.Select(i => i + off);
-
-        private IEnumerable<Point> Translate(IEnumerable<Point> o, Vector2 off)
-            => o.Select(i => (i.ToVector2() + off).ToPoint());
-
-        private IEnumerable<Point> Translate(IEnumerable<Point> o, Point off)
-            => o.Select(i => i + off);
+        private Rectangle Translate(Rectangle r, Point off)
+            => new Rectangle(r.X + off.X, r.Y + off.Y, r.Width, r.Height);
 
         private IEnumerable<Vector2> GetEdgePoints(Rectangle r)
         {

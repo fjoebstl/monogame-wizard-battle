@@ -39,10 +39,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="GameObjects\Player\Bullet.cs" />
-    <Compile Include="GameObjects\Tile.cs" />
+    <Compile Include="GameObjects\Tiles\Tile.cs" />
     <Compile Include="System\Camera2d.cs" />
     <Compile Include="System\Collision.cs" />
-    <Compile Include="GameObjects\GameMap.cs" />
+    <Compile Include="GameObjects\Tiles\GameMap.cs" />
     <Compile Include="GameObjects\IEntity.cs" />
     <Compile Include="System\EntityCollection.cs" />
     <Compile Include="System\GameState.cs" />
@@ -56,7 +56,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GameResources\R.cs" />
-    <Compile Include="GameObjects\TileMap.cs" />
+    <Compile Include="GameObjects\Tiles\TileCollection.cs" />
     <Compile Include="System\MathUtil.cs" />
   </ItemGroup>
   <ItemGroup>
