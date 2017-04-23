@@ -185,6 +185,9 @@ namespace SideGamePrototype
 
     internal class DiveDownState : DrawableState
     {
+        private float chargeTime = 0.0f;
+        private readonly float maxCharge = 0.2f;
+
         public DiveDownState(IEntity entity, IInputHandler input)
             : base(nameof(DiveDownState), entity, input)
         {
@@ -192,14 +195,47 @@ namespace SideGamePrototype
 
         public override Stack<State> Update(float gt)
         {
+            this.chargeTime += gt;
+
             this.entity.Body.AddForce("g", new Vector2(0, 3.5f));
             this.entity.Body.AddVelocityComponent("downforce", new Vector2(0, 3));
 
             return base.Update(gt);
         }
 
+        public override void OnEnter()
+        {
+            this.chargeTime = 0.0f;
+            base.OnEnter();
+        }
+
+        public override void OnExit()
+        {
+            if (this.chargeTime >= maxCharge)
+            {
+                var body = this.entity.Body;
+                this.CreateBullet(body.LookAt, 4.0f);
+                this.CreateBullet(-body.LookAt, 4.0f);
+                this.CreateBullet(new Vector2(-1, -1f), 2.0f);
+                this.CreateBullet(new Vector2(1, -1f), 2.0f);
+                this.CreateBullet(new Vector2(0, -1.0f), 3.0f);
+            }
+
+            this.chargeTime = 0.0f;
+            base.OnExit();
+        }
+
+        private void CreateBullet(Vector2 dir, float speed)
+        {
+            var body = this.entity.Body;
+            var pos = body.BoundingBox.Center.ToVector2() + dir * 20.0f;
+            var b = new Bullet(pos - body.BoundingBox.Size.ToVector2() / 2.0f);
+            b.Body.AddVelocityComponent("b", dir * speed, isConstant: true);
+            GameState.Entities.Add(b);
+        }
+
         protected override string GetTileString()
-            => "3,E";
+            => this.chargeTime >= this.maxCharge ? "3,E" : "3,D";
     }
 
     internal class DyingState : DrawableState
