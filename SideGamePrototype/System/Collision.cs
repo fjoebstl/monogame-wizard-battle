@@ -2,6 +2,7 @@
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Resources;
+using System;
 
 namespace SideGamePrototype
 {
@@ -36,6 +37,11 @@ namespace SideGamePrototype
 
         public CollisionResult Move(IRigidBody body, Vector2 targetPosition)
         {
+            var tt = new Point((int)Math.Round(targetPosition.X), (int)Math.Round(targetPosition.Y));
+
+            if (body.Positon.ToPoint().Equals(tt))
+                return null;
+
             var oldPosition = body.Positon;
 
             body.Positon = targetPosition;
@@ -48,18 +54,15 @@ namespace SideGamePrototype
         private CollisionResult Collides(IRigidBody body)
         {
             //Points to test
-            var test = Translate(body.Shape.SolidPixels, body.Positon)
-                .Select(x => x.ToPoint());
+            var test = Translate(body.Shape.SolidPixels, body.Positon);
 
             //Collect all tile and entity points
             var tiles = GetEdgePoints(body.BoundingBox)
-                .SelectMany(p => TileCharToPoints(GetTileCharAt(p), p))
-                .Select(x => x.ToPoint());
+                .SelectMany(p => TileCharToPoints(GetTileCharAt(p), p));
 
             var entities = this.entities.All
                 .Where(e => e.Body != body && e.Body.BoundingBox.Intersects(body.BoundingBox))
-                .SelectMany(e => Translate(e.Body.Shape.SolidPixels, e.Body.Positon))
-                .Select(x => x.ToPoint());
+                .SelectMany(e => Translate(e.Body.Shape.SolidPixels, e.Body.Positon.ToPoint()));
 
             var all = tiles.Union(entities);
 
@@ -69,18 +72,18 @@ namespace SideGamePrototype
             //Test if body on ground
             var origin = body.BoundingBox.Center;
             var rOnGround = all.Intersect(Translate(test, new Point(0, 1)));
-            var onGround = rOnGround.Any() && rOnGround.All(p => p.Y > origin.Y);
+            var onGround = rOnGround.Any() && rOnGround.Any(p => p.Y > origin.Y);
 
             return new CollisionResult() { CollisionPoints = r.ToList(), StandsOnGround = onGround };
         }
 
-        private IEnumerable<Vector2> TileCharToPoints(char tileChar, Vector2 p)
+        private IEnumerable<Point> TileCharToPoints(char tileChar, Vector2 p)
         {
             if (tileChar == ' ')
-                return new List<Vector2>();
+                return new List<Point>();
 
             var solidPoints = R.Textures.Tiles.GetCollisionTileFromChar(tileChar).GetSolidPoints();
-            var tileTopLeft = new Vector2((int)(p.X / 16) * 16, (int)(p.Y / 16) * 16);
+            var tileTopLeft = new Point((int)(p.X / 16) * 16, (int)(p.Y / 16) * 16);
             var trans = Translate(solidPoints, tileTopLeft);
 
             return trans;
@@ -91,6 +94,9 @@ namespace SideGamePrototype
 
         private IEnumerable<Vector2> Translate(IEnumerable<Vector2> o, Vector2 off)
             => o.Select(i => i + off);
+
+        private IEnumerable<Point> Translate(IEnumerable<Point> o, Vector2 off)
+            => o.Select(i => (i.ToVector2() + off).ToPoint());
 
         private IEnumerable<Point> Translate(IEnumerable<Point> o, Point off)
             => o.Select(i => i + off);

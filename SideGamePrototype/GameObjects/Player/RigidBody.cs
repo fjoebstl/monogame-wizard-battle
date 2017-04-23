@@ -13,6 +13,8 @@ namespace SideGamePrototype
         Vector2 Positon { get; set; }
         CollisionResult LastCollisionResult { get; }
 
+        Vector2 Velocity { get; }
+
         void AddForce(string name, Vector2 f, bool isConstant = false);
         void AddVelocityComponent(string name, Vector2 f, bool isConstant = false);
         void Update(float dt);
@@ -28,17 +30,14 @@ namespace SideGamePrototype
             public bool isConstant = false;
         }
 
+        public Vector2 Velocity { get; private set; } = new Vector2();
         public Vector2 Positon { get; set; }
         public Vector2 LookAt { get; set; } = new Vector2();
         public CollisionResult LastCollisionResult { get; private set; } = new CollisionResult();
 
-        public Rectangle BoundingBox => new Rectangle(
-            (int)this.Positon.X,
-            (int)this.Positon.Y,
-            (int)this.getCurrentShape().Size.X,
-            (int)this.getCurrentShape().Size.Y);
+        public Rectangle BoundingBox { get; private set; } = new Rectangle();
 
-        public PixelShape Shape => this.getCurrentShape();
+        public PixelShape Shape { get; private set; }
 
         private readonly Func<PixelShape> getCurrentShape;
         private readonly Dictionary<string, ForceComponent> forces = new Dictionary<string, ForceComponent>();
@@ -66,6 +65,13 @@ namespace SideGamePrototype
 
         public void Update(float dt)
         {
+            this.Shape = this.getCurrentShape();
+            this.BoundingBox = new Rectangle(
+           (int)this.Positon.X,
+           (int)this.Positon.Y,
+           (int)this.Shape.Size.X,
+           (int)this.Shape.Size.Y);
+
             var pos = this.Positon;
             foreach (var force in this.forces.Values)
             {
@@ -73,11 +79,18 @@ namespace SideGamePrototype
                 pos += force.vel;
             }
 
+            this.Velocity = pos - this.Positon;
+
             CollisionResult collResult = new CollisionResult();
 
             do
             {
                 collResult = GameState.Collision.Move(this, pos);
+                if (collResult == null)
+                {
+                    collResult = this.LastCollisionResult;
+                    break;
+                }
 
                 if (collResult.WasCollision)
                     pos = this.Positon + (pos - this.Positon) / 2.0f;
@@ -98,10 +111,10 @@ namespace SideGamePrototype
 
             ResetForces(collResult);
 
-            this.LastCollisionResult.CollisionPoints = collResult.CollisionPoints;
+            this.LastCollisionResult = collResult;
 
             //ToDo: should not be calculated twice
-            this.LastCollisionResult.StandsOnGround = GameState.Collision.Move(this, this.Positon).StandsOnGround;
+            //this.LastCollisionResult.StandsOnGround = collResult.StandsOnGround;//GameState.Collision.Move(this, this.Positon).StandsOnGround;
         }
 
         private void ResetForces(CollisionResult collResult)
@@ -127,7 +140,7 @@ namespace SideGamePrototype
 
     public class PixelShape
     {
-        public IEnumerable<Vector2> SolidPixels { get; set; }
+        public IEnumerable<Point> SolidPixels { get; set; }
         public Vector2 Size { get; set; }
 
         public static PixelShape FromTile(Tile t)

@@ -67,11 +67,11 @@ namespace SideGamePrototype
         public void Draw(SpriteBatch s)
         {
             //DEBUG
-            //if (this.Body.LastCollisionResult.WasCollision)
-            //{
-            //    var b = this.Body.BoundingBox;
-            //    s.Draw(R.Textures.Red, b, Color.White);
-            //}
+            if (this.Body.LastCollisionResult.WasCollision)
+            {
+                var b = this.Body.BoundingBox;
+                s.Draw(R.Textures.Red, b, Color.White);
+            }
             //DEBUG
 
             ((DrawableState)this.currentStates.Peek()).Draw(s);
@@ -198,14 +198,14 @@ namespace SideGamePrototype
         {
         }
 
-        public override void OnExit()
+        public override void OnEnter()
         {
-            var pos = this.body.Positon + this.body.LookAt * 10.0f;
-            var b = new Bullet(pos);
-            b.Body.AddVelocityComponent("b", this.body.LookAt, isConstant: true);
+            var pos = this.body.BoundingBox.Center.ToVector2() + this.body.LookAt * 20.0f;
+            var b = new Bullet(pos - this.body.BoundingBox.Size.ToVector2() / 2.0f);
+            b.Body.AddVelocityComponent("b", this.body.LookAt * 3.0f, isConstant: true);
 
             GameState.Entities.Add(b);
-            base.OnExit();
+            base.OnEnter();
         }
 
         public override Stack<State> Update(float gt)

@@ -77,7 +77,7 @@ namespace SideGamePrototype
             GameState.Camera.ZoomWidth(r.Width, 1.0f, 3.0f);
             //Camera TEST
 
-            //Console.WriteLine($"{Collision.a.ElapsedMilliseconds}ms {Collision.b.ElapsedMilliseconds}ms {Collision.c.ElapsedMilliseconds}ms");
+            // Console.WriteLine($"{Collision.a.ElapsedMilliseconds}ms {Collision.b.ElapsedMilliseconds}ms {Collision.c.ElapsedMilliseconds}ms");
 
             base.Update(gameTime);
         }

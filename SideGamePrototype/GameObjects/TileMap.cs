@@ -46,11 +46,11 @@ namespace SideGamePrototype
                 effects: eff,
                 layerDepth: 1.0f);
 
-        public IEnumerable<Vector2> GetSolidPoints()
+        public Point[] GetSolidPoints()
         {
             //Get all pixels of image which are not fully transparent
 
-            var l = new List<Vector2>();
+            var l = new List<Point>();
             var raw = R.Textures.GetPixels(this.t);
 
             for (int x = 0; x < this.r.Width; x++)
@@ -60,7 +60,7 @@ namespace SideGamePrototype
                     var pixel = raw.GetPixel(this.r.X + x, this.r.Y + y, this.t.Width);
                     if (pixel.A > 0.0f)
                     {
-                        l.Add(new Vector2(x, y));
+                        l.Add(new Point(x, y));
                     }
                 }
             }
