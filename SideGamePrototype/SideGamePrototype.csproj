@@ -39,6 +39,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="GameLogic.cs" />
+    <Compile Include="GameUI.cs" />
     <Compile Include="Objects\Bullet.cs" />
     <Compile Include="Tiles\Tile.cs" />
     <Compile Include="System\Camera\Camera2d.cs" />
@@ -47,7 +48,7 @@
     <Compile Include="Tiles\GameMap.cs" />
     <Compile Include="Entity\IEntity.cs" />
     <Compile Include="Entity\EntityCollection.cs" />
-    <Compile Include="System\GameState.cs" />
+    <Compile Include="GameState.cs" />
     <Compile Include="System\InputHandler.cs" />
     <Compile Include="Entity\RigidBody.cs" />
     <Compile Include="Entity\State.cs" />
@@ -76,13 +77,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Content\Background.pdn" />
     <None Include="Content\Background.png" />
     <Content Include="Content\Game.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Content\Overlay.pdn" />
     <None Include="Content\Resources.pdn" />
     <None Include="Content\Resources.png" />
+    <Content Include="Content\Overlay.png" />
     <Content Include="Icon.ico" />
+    <None Include="Content\Segoe_UI_10.5_Regular.spritefont" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

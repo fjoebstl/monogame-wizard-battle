@@ -10,7 +10,6 @@ namespace SideGamePrototype
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
         private GameMapRenderer mapRenderer;
-        private GameLogic logic;
 
         public SideGameProto()
         {
@@ -41,8 +40,8 @@ namespace SideGamePrototype
             GameState.Entities = new EntityCollection();
             GameState.Collision = new Collision(map, GameState.Entities);
 
-            this.logic = new GameLogic();
-            this.logic.Init();
+            GameState.Logic = new GameLogic();
+            GameState.Logic.Init();
         }
 
         protected override void UnloadContent()
@@ -54,16 +53,17 @@ namespace SideGamePrototype
         {
             float dt = (float)gameTime.ElapsedGameTime.TotalMilliseconds / 1000.0f;
 
-            GameState.Entities.Update(dt);
-            ZoomingCamera.UpdateCamera(dt);
-
-            this.logic.Update(dt);
+            GameState.Update(dt);
 
             //DEBUG
             if (Keyboard.GetState().IsKeyDown(Keys.F1))
                 GameState.DEBUG = true;
             if (Keyboard.GetState().IsKeyDown(Keys.F2))
                 GameState.DEBUG = false;
+            if (Keyboard.GetState().IsKeyDown(Keys.F3))
+                GameState.PAUSE = true;
+            if (Keyboard.GetState().IsKeyDown(Keys.F4))
+                GameState.PAUSE = false;
             //DEBUG
 
             base.Update(gameTime);
@@ -83,8 +83,13 @@ namespace SideGamePrototype
 
             this.spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: viewMatrix);
             this.mapRenderer.Draw(this.spriteBatch);
+            this.spriteBatch.Draw(R.Textures.Overlay, new Vector2(0, 0), Color.White);
             GameState.Entities.Draw(this.spriteBatch);
+            this.spriteBatch.End();
 
+            //UI
+            this.spriteBatch.Begin();
+            GameUI.Draw(this.spriteBatch);
             this.spriteBatch.End();
 
             base.Draw(gameTime);

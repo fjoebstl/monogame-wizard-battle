@@ -19,3 +19,12 @@
 #begin Resources.png
 /copy:Resources.png
 
+#begin Segoe_UI_10.5_Regular.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=Compressed
+/build:Segoe_UI_10.5_Regular.spritefont
+
+#begin Overlay.png
+/copy:Overlay.png
+

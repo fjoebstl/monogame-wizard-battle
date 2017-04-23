@@ -11,11 +11,13 @@ namespace Resources
     {
         public static T Textures;
         public static S System;
+        public static F Fonts;
 
         internal static void Init(GraphicsDeviceManager d, ContentManager content, IntPtr window)
         {
             Textures = new T(d.GraphicsDevice, content);
             System = new S(d, content, window);
+            Fonts = new F(content);
         }
 
         internal static void Unload()
@@ -23,9 +25,20 @@ namespace Resources
             Textures.Dispose();
         }
 
+        public class F
+        {
+            public SpriteFont Default { get; private set; }
+
+            public F(ContentManager content)
+            {
+                this.Default = content.Load<SpriteFont>("Segoe_UI_10.5_Regular");
+            }
+        }
+
         public class T : IDisposable
         {
             public readonly Texture2D Background;
+            public readonly Texture2D Overlay;
             public readonly ITileCollection Tiles;
 
             public Texture2D Red;
@@ -37,6 +50,7 @@ namespace Resources
             {
                 c.RootDirectory = "./Content";
                 this.Background = c.Load<Texture2D>("Background.png");
+                this.Overlay = c.Load<Texture2D>("Overlay.png");
                 this.tileTexture = c.Load<Texture2D>("Resources.png");
                 this.Red = Texture2dHelper.CreateTexture(d, 10, 10, (_) => Color.Red);
                 this.White = Texture2dHelper.CreateTexture(d, 10, 10, (_) => Color.White);
