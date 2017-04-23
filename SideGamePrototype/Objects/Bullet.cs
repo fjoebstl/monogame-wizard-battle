@@ -8,7 +8,7 @@ namespace SideGamePrototype
     internal class Bullet : IEntity
     {
         public IRigidBody Body { get; private set; }
-        public bool Dead { get; private set; }
+        public bool Dead { get; set; }
 
         public Bullet(Vector2 pos)
         {
