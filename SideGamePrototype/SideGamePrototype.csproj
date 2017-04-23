@@ -38,6 +38,7 @@
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="GameLogic.cs" />
     <Compile Include="Objects\Bullet.cs" />
     <Compile Include="Tiles\Tile.cs" />
     <Compile Include="System\Camera\Camera2d.cs" />

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Resources;
+using System;
 using System.Linq;
 
 namespace SideGamePrototype
@@ -30,12 +31,17 @@ namespace SideGamePrototype
             {
                 float x = GameState.Camera.Position.X;
                 float y = GameState.Camera.Position.Y;
+                float speed = 2.0f;
 
-                if ((int)x != 0)
-                    x += x > 0 ? -2.0f : 2.0f;
+                if (Math.Abs(x) <= speed)
+                    x = 0;
+                else
+                    x += x > 0 ? -speed : speed;
 
-                if ((int)y != 0)
-                    y += y > 0 ? -2.0f : 2.0f;
+                if (Math.Abs(y) <= speed)
+                    y = 0;
+                else
+                    y += y > 0 ? -speed : speed;
 
                 GameState.Camera.Position = new Vector2(x, y);
 

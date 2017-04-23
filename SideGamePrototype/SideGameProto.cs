@@ -10,6 +10,7 @@ namespace SideGamePrototype
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
         private GameMapRenderer mapRenderer;
+        private GameLogic logic;
 
         public SideGameProto()
         {
@@ -40,13 +41,8 @@ namespace SideGamePrototype
             GameState.Entities = new EntityCollection();
             GameState.Collision = new Collision(map, GameState.Entities);
 
-            GameState.Entities.Add(new Wizard(
-                pos: new Vector2(100, 500),
-                input: new KeyboardLayout1InputHandler()));
-
-            GameState.Entities.Add(new Wizard(
-                pos: new Vector2(200, 500),
-                input: new KeyboardLayout2InputHandler()));
+            this.logic = new GameLogic();
+            this.logic.Init();
         }
 
         protected override void UnloadContent()
@@ -60,6 +56,8 @@ namespace SideGamePrototype
 
             GameState.Entities.Update(dt);
             ZoomingCamera.UpdateCamera(dt);
+
+            this.logic.Update(dt);
 
             //DEBUG
             if (Keyboard.GetState().IsKeyDown(Keys.F1))
