@@ -86,11 +86,7 @@ namespace SideGamePrototype
             //Get new states
             this.currentStates = this.currentStates.Peek().Update(dt);
 
-            var s = Stopwatch.StartNew();
             this.Body.Update(dt);
-            s.Stop();
-
-            //Console.WriteLine(s.ElapsedMilliseconds);
         }
 
         public void Hit()

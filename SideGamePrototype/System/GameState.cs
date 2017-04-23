@@ -12,6 +12,6 @@ namespace SideGamePrototype
         public static ICollision Collision { get; set; }
         public static Camera2D Camera { get; set; }
 
-        public static bool DEBUG { get; set; } = true;
+        public static bool DEBUG { get; set; } = false;
     }
 }

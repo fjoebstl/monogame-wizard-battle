@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using Resources;
 
 namespace SideGamePrototype
@@ -59,6 +60,13 @@ namespace SideGamePrototype
 
             GameState.Entities.Update(dt);
             ZoomingCamera.UpdateCamera(dt);
+
+            //DEBUG
+            if (Keyboard.GetState().IsKeyDown(Keys.F1))
+                GameState.DEBUG = true;
+            if (Keyboard.GetState().IsKeyDown(Keys.F2))
+                GameState.DEBUG = false;
+            //DEBUG
 
             base.Update(gameTime);
         }

@@ -7,7 +7,6 @@ namespace SideGamePrototype
     internal interface IRigidBody
     {
         Rectangle BoundingBox { get; }
-        Tile Shape { get; }
 
         Vector2 LookAt { get; set; }
         Vector2 Positon { get; set; }
@@ -37,15 +36,14 @@ namespace SideGamePrototype
 
         public Rectangle BoundingBox { get; private set; } = new Rectangle();
 
-        public Tile Shape { get; private set; }
-
-        private readonly Func<Tile> getCurrentShape;
+        private Tile tile { get; set; }
+        private readonly Func<Tile> getCurrentTile;
         private readonly Dictionary<string, ForceComponent> forces = new Dictionary<string, ForceComponent>();
 
-        public RigidBody(Vector2 position, Func<Tile> getCurrentShape)
+        public RigidBody(Vector2 position, Func<Tile> getCurrentTile)
         {
             this.Positon = position;
-            this.getCurrentShape = getCurrentShape;
+            this.getCurrentTile = getCurrentTile;
         }
 
         public void AddForce(string name, Vector2 f, bool isConstant = false)
@@ -65,12 +63,17 @@ namespace SideGamePrototype
 
         public void Update(float dt)
         {
-            this.Shape = this.getCurrentShape();
+            this.tile = this.getCurrentTile();
+
+            var bb = this.tile.CollisionBox;
+            if (this.LookAt.X > 0)
+                bb = MathUtil.FlipHorizontal(bb, (int)this.tile.Size.X);
+
             this.BoundingBox = new Rectangle(
-               (int)this.Positon.X,
-               (int)this.Positon.Y,
-               (int)this.Shape.Size.X,
-               (int)this.Shape.Size.Y);
+                (int)this.Positon.X + bb.X,
+                (int)this.Positon.Y + bb.Y,
+                bb.Width,
+                bb.Height);
 
             var pos = this.Positon;
             foreach (var force in this.forces.Values)

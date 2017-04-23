@@ -64,14 +64,23 @@ namespace SideGamePrototype
             //DEBUG
             if (GameState.DEBUG)
             {
+                var collBox = this.CollisionBox;
+
+                if (eff == SpriteEffects.FlipHorizontally)
+                {
+                    collBox = MathUtil.FlipHorizontal(collBox, this.r.Size.X);
+                }
+
+                var box = new Rectangle(
+                     destination.X + collBox.X,
+                     destination.Y + collBox.Y,
+                     collBox.Width,
+                     collBox.Height);
+
                 s.Draw(
                  texture: R.Textures.White,
-                 destinationRectangle: new Rectangle(
-                     destination.X + this.CollisionBox.X,
-                     destination.Y + this.CollisionBox.Y,
-                     this.CollisionBox.Width,
-                     this.CollisionBox.Height),
-                 sourceRectangle: r,
+                 destinationRectangle: box,
+                 sourceRectangle: new Rectangle(),
                  color: this.CollisionType == CollisionType.Solid ? DEBUG_SOLID : Color.Transparent,
                  rotation: 0.0f,
                  origin: new Vector2(),

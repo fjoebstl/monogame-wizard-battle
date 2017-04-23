@@ -41,31 +41,31 @@ namespace SideGamePrototype
             IEntity e;
 
             //Vertical
-            var targetPointV = new Point((int)body.Positon.X, (int)targetPosition.Y);
+            var offV = new Point(0, (int)targetPosition.Y - (int)body.Positon.Y);
 
-            var hitV = Collides(body, targetPointV, out e);
+            var hitV = Collides(body, offV, out e);
             if (e != null)
                 entities.Add(e);
 
-            var selfV = Translate(body.Shape.CollisionBox, targetPointV);
+            var selfV = Translate(body.BoundingBox, offV);
             if (hitV != Rectangle.Empty)
             {
                 yoff = selfV.Y < hitV.Y ? selfV.Bottom - hitV.Top : selfV.Top - hitV.Bottom;
             }
 
             //Horizontal
-            var targetPointH = new Point((int)targetPosition.X, (int)targetPosition.Y - yoff);
-            var hitH = Collides(body, targetPointH, out e);
+            var offH = new Point((int)targetPosition.X - (int)body.Positon.X, 0 - yoff);
+            var hitH = Collides(body, offH, out e);
             if (e != null)
                 entities.Add(e);
 
-            var selfH = Translate(body.Shape.CollisionBox, targetPointH);
+            var selfH = Translate(body.BoundingBox, offH);
             if (hitH != Rectangle.Empty)
             {
                 xoff = selfH.X < hitH.X ? selfH.Right - hitH.Left : selfH.Left - selfH.Right;
             }
 
-            var onGround = Collides(body, targetPointV + new Point(xoff, yoff + 1), out e) != Rectangle.Empty;
+            var onGround = Collides(body, offV + new Point(xoff, yoff + 1), out e) != Rectangle.Empty;
 
             var r = new CollisionResult();
             r.AvailablePosition = targetPosition - new Vector2(xoff, yoff);
@@ -76,9 +76,9 @@ namespace SideGamePrototype
             return r;
         }
 
-        private Rectangle Collides(IRigidBody body, Point targetPosition, out IEntity collEntity)
+        private Rectangle Collides(IRigidBody body, Point off, out IEntity collEntity)
         {
-            var hitRect = Translate(body.Shape.CollisionBox, targetPosition);
+            var hitRect = Translate(body.BoundingBox, off);
             collEntity = null;
 
             foreach (var p in GetEdgePoints(hitRect))
@@ -100,13 +100,12 @@ namespace SideGamePrototype
                 }
             }
 
-            foreach (var otherEntity in this.entities.All.Where(e => e.Body != body && e.Body.Shape != null))
+            foreach (var otherEntity in this.entities.All.Where(e => e.Body != body))
             {
-                var translatedOther = Translate(otherEntity.Body.Shape.CollisionBox, otherEntity.Body.Positon.ToPoint());
-                if (hitRect.Intersects(translatedOther))
+                if (hitRect.Intersects(otherEntity.Body.BoundingBox))
                 {
                     collEntity = otherEntity;
-                    return translatedOther;
+                    return otherEntity.Body.BoundingBox;
                 }
             }
 
