@@ -32,7 +32,7 @@ namespace SideGamePrototype
 
         public Vector2 Velocity { get; private set; } = new Vector2();
         public Vector2 Positon { get; set; }
-        public Vector2 LookAt { get; set; } = new Vector2();
+        public Vector2 LookAt { get; set; } = new Vector2(1, 0);
         public CollisionResult LastCollisionResult { get; private set; } = new CollisionResult();
 
         public Rectangle BoundingBox { get; private set; } = new Rectangle();

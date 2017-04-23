@@ -11,7 +11,7 @@ namespace SideGamePrototype
     internal class Wizard : IEntity
     {
         public IRigidBody Body { get; private set; }
-        public bool Dead => false;
+        public bool Dead { get; set; } = false;
 
         private Stack<State> currentStates;
 
@@ -91,6 +91,11 @@ namespace SideGamePrototype
             s.Stop();
 
             //Console.WriteLine(s.ElapsedMilliseconds);
+        }
+
+        public void Hit()
+        {
+            this.Dead = true;
         }
 
         private Tile GetCurrentShape()
@@ -200,7 +205,7 @@ namespace SideGamePrototype
 
         public override void OnEnter()
         {
-            var pos = this.body.BoundingBox.Center.ToVector2() + this.body.LookAt * 20.0f;
+            var pos = this.body.BoundingBox.Center.ToVector2() + this.body.LookAt * 16.0f;
             var b = new Bullet(pos - this.body.BoundingBox.Size.ToVector2() / 2.0f);
             b.Body.AddVelocityComponent("b", this.body.LookAt * 3.0f, isConstant: true);
 

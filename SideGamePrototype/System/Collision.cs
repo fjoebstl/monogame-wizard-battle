@@ -2,7 +2,6 @@
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Resources;
-using System;
 
 namespace SideGamePrototype
 {
@@ -16,6 +15,7 @@ namespace SideGamePrototype
         public bool WasCollision { get; set; }
         public bool StandsOnGround { get; set; } = false;
         public Vector2 AvailablePosition { get; set; }
+        public List<IEntity> EntityCollisions { get; set; } = new List<IEntity>();
     }
 
     internal class Collision : ICollision
@@ -31,13 +31,22 @@ namespace SideGamePrototype
 
         public CollisionResult Move(IRigidBody body, Vector2 targetPosition)
         {
+            //Should be re-implemented according to
+            //http://higherorderfun.com/blog/2012/05/20/the-guide-to-implementing-2d-platformers/
+
             int yoff = 0;
             int xoff = 0;
+
+            var entities = new HashSet<IEntity>();
+            IEntity e;
 
             //Vertical
             var targetPointV = new Point((int)body.Positon.X, (int)targetPosition.Y);
 
-            var hitV = Collides(body, targetPointV);
+            var hitV = Collides(body, targetPointV, out e);
+            if (e != null)
+                entities.Add(e);
+
             var selfV = Translate(body.Shape.CollisionBox, targetPointV);
             if (hitV != Rectangle.Empty)
             {
@@ -46,26 +55,31 @@ namespace SideGamePrototype
 
             //Horizontal
             var targetPointH = new Point((int)targetPosition.X, (int)targetPosition.Y - yoff);
-            var hitH = Collides(body, targetPointH);
+            var hitH = Collides(body, targetPointH, out e);
+            if (e != null)
+                entities.Add(e);
+
             var selfH = Translate(body.Shape.CollisionBox, targetPointH);
             if (hitH != Rectangle.Empty)
             {
                 xoff = selfH.X < hitH.X ? selfH.Right - hitH.Left : selfH.Left - selfH.Right;
             }
 
-            var onGround = Collides(body, targetPointV + new Point(xoff, yoff + 1)) != Rectangle.Empty;
+            var onGround = Collides(body, targetPointV + new Point(xoff, yoff + 1), out e) != Rectangle.Empty;
 
             var r = new CollisionResult();
             r.AvailablePosition = targetPosition - new Vector2(xoff, yoff);
             r.WasCollision = hitV != Rectangle.Empty || hitH != Rectangle.Empty;
             r.StandsOnGround = onGround;
+            r.EntityCollisions = entities.ToList();
 
             return r;
         }
 
-        private Rectangle Collides(IRigidBody body, Point targetPosition)
+        private Rectangle Collides(IRigidBody body, Point targetPosition, out IEntity collEntity)
         {
             var hitRect = Translate(body.Shape.CollisionBox, targetPosition);
+            collEntity = null;
 
             foreach (var p in GetEdgePoints(hitRect))
             {
@@ -91,6 +105,7 @@ namespace SideGamePrototype
                 var translatedOther = Translate(otherEntity.Body.Shape.CollisionBox, otherEntity.Body.Positon.ToPoint());
                 if (hitRect.Intersects(translatedOther))
                 {
+                    collEntity = otherEntity;
                     return translatedOther;
                 }
             }

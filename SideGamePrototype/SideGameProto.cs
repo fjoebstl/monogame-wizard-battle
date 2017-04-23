@@ -1,8 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Resources;
-using System;
-using System.Collections.Generic;
 
 namespace SideGamePrototype
 {
@@ -60,24 +58,7 @@ namespace SideGamePrototype
             float dt = (float)gameTime.ElapsedGameTime.TotalMilliseconds / 1000.0f;
 
             GameState.Entities.Update(dt);
-
-            //Camera TEST
-            var w1 = GameState.Entities.All[0];
-            var w2 = GameState.Entities.All[1];
-
-            var origin = w1.Body.Positon - (w1.Body.Positon - w2.Body.Positon) / 2.0f;
-
-            GameState.Camera.Position = origin - new Vector2(
-                this.graphics.GraphicsDevice.Viewport.Width,
-                this.graphics.GraphicsDevice.Viewport.Height) / 2.0f;
-
-            var r = MathUtil.Union(w1.Body.BoundingBox, w2.Body.BoundingBox);
-            r.Inflate(200, 100);
-
-            GameState.Camera.ZoomWidth(r.Width, 1.0f, 3.0f);
-            //Camera TEST
-
-            // Console.WriteLine($"{Collision.a.ElapsedMilliseconds}ms {Collision.b.ElapsedMilliseconds}ms {Collision.c.ElapsedMilliseconds}ms");
+            ZoomingCamera.UpdateCamera(dt);
 
             base.Update(gameTime);
         }

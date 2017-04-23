@@ -40,7 +40,8 @@
   <ItemGroup>
     <Compile Include="GameObjects\Player\Bullet.cs" />
     <Compile Include="GameObjects\Tiles\Tile.cs" />
-    <Compile Include="System\Camera2d.cs" />
+    <Compile Include="System\Camera\Camera2d.cs" />
+    <Compile Include="System\Camera\ZoomingCamera.cs" />
     <Compile Include="System\Collision.cs" />
     <Compile Include="GameObjects\Tiles\GameMap.cs" />
     <Compile Include="GameObjects\IEntity.cs" />

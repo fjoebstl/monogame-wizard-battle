@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Resources;
+using System.Linq;
 
 namespace SideGamePrototype
 {
@@ -32,7 +33,13 @@ namespace SideGamePrototype
             this.Body.Update(dt);
 
             if (this.Body.LastCollisionResult.WasCollision)
+            {
+                var w = this.Body.LastCollisionResult.EntityCollisions.Where(e => e is Wizard).FirstOrDefault() as Wizard;
+                if (w != null)
+                    w.Hit();
+
                 this.Dead = true;
+            }
         }
 
         private Tile GetCurrentShape()
