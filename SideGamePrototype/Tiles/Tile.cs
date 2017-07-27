@@ -11,8 +11,9 @@ namespace SideGamePrototype
 
     public class Tile
     {
-        private static readonly Color DEBUG_SOLID = Color.FromNonPremultiplied(0, 0, 255, 200);
-        private static readonly Color DEBUG_YPASS = Color.FromNonPremultiplied(0, 255, 0, 200);
+        private static readonly Color DEBUG_SOLID = Color.FromNonPremultiplied(0, 0, 255, 180);
+        private static readonly Color DEBUG_ONEWAY = Color.FromNonPremultiplied(255, 0, 0, 180);
+        private static readonly Color DEBUG_YPASS = Color.FromNonPremultiplied(0, 255, 0, 180);
 
         private readonly TextureInfo t;
         private readonly Rectangle r;
@@ -81,7 +82,9 @@ namespace SideGamePrototype
                  texture: R.Textures.White,
                  destinationRectangle: box,
                  sourceRectangle: new Rectangle(),
-                 color: this.CollisionType == CollisionType.Solid ? DEBUG_SOLID : Color.Transparent,
+                 color: this.CollisionType == CollisionType.Solid ? DEBUG_SOLID :
+                        this.CollisionType == CollisionType.OneWay ? DEBUG_ONEWAY :
+                        Color.Transparent,
                  rotation: 0.0f,
                  origin: new Vector2(),
                  effects: eff,
