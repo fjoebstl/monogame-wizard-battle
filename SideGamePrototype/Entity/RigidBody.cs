@@ -14,6 +14,8 @@ namespace SideGamePrototype
 
         Vector2 Velocity { get; }
 
+        bool IsStatic { get; set; }
+
         void AddForce(string name, Vector2 f, bool isConstant = false);
         void AddVelocityComponent(string name, Vector2 f, bool isConstant = false);
         void Update(float dt);
@@ -35,6 +37,7 @@ namespace SideGamePrototype
         public CollisionResult LastCollisionResult { get; private set; } = new CollisionResult();
 
         public Rectangle BoundingBox { get; private set; } = new Rectangle();
+        public bool IsStatic { get; set; } = false;
 
         private Tile tile { get; set; }
         private readonly Func<Tile> getCurrentTile;

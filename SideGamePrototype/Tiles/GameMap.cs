@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Resources;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -68,6 +70,8 @@ namespace SideGamePrototype
 
     public class GameMapMirrorReader
     {
+        public static Dictionary<char, Action<int, int>> CustomEvents = new Dictionary<char, Action<int, int>>();
+
         public static GameMap FromFile(string file)
         {
             var lines = File.ReadAllLines(file);
@@ -96,7 +100,15 @@ namespace SideGamePrototype
                             c = '(';
                     }
 
-                    data[x, y] = c;
+                    if (CustomEvents.ContainsKey(c))
+                    {
+                        CustomEvents[c](x, y);
+                        data[x, y] = ' ';
+                    }
+                    else
+                    {
+                        data[x, y] = c;
+                    }
                 }
             }
 

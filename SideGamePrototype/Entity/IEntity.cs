@@ -16,5 +16,7 @@ namespace SideGamePrototype
     {
         IRigidBody Body { get; }
         bool Dead { get; set; }
+
+        CollisionType CollisionType { get; }
     }
 }

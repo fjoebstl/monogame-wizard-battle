@@ -102,6 +102,8 @@ namespace SideGamePrototype
             this.wasHit = true;
         }
 
+        public CollisionType CollisionType => ((DrawableState)this.currentStates.Peek()).GetTile().CollisionType;
+
         private Tile GetCurrentShape()
             => ((DrawableState)this.currentStates.Peek()).GetTile();
     }

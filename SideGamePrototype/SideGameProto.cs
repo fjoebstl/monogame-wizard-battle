@@ -32,12 +32,24 @@ namespace SideGamePrototype
             //init camera
             GameState.Camera = new Camera2D(graphics.GraphicsDevice.Viewport);
 
+            //init entities
+            GameState.Entities = new EntityCollection();
+            GameMapMirrorReader.CustomEvents.Add('x', (x, y) =>
+            {
+                var b = new Spike(new Vector2(x * 16, y * 16));
+                GameState.Entities.Add(b);
+            });
+            GameMapMirrorReader.CustomEvents.Add('v', (x, y) =>
+            {
+                var b = new Spike(new Vector2(x * 16, y * 16), topSpike: true);
+                GameState.Entities.Add(b);
+            });
+
             //create game map
             var map = GameMapMirrorReader.FromFile(@"Content/Game.txt");
             this.mapRenderer = new GameMapRenderer(map);
 
-            //init entities
-            GameState.Entities = new EntityCollection();
+            //init collision
             GameState.Collision = new Collision(map, GameState.Entities);
 
             GameState.Logic = new GameLogic();

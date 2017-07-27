@@ -6,7 +6,7 @@ namespace SideGamePrototype
 {
     public enum CollisionType
     {
-        None, Solid, YPassable,
+        None, Solid, YPassable, OneWay
     }
 
     public class Tile
@@ -129,7 +129,15 @@ namespace SideGamePrototype
             }
 
             this.CollisionBox = new Rectangle(l, t, r - l + 1, b - t + 1);
-            this.CollisionType = shapeColor.B > shapeColor.R ? CollisionType.Solid : CollisionType.YPassable;
+
+            if (shapeColor.B > shapeColor.G)
+            {
+                this.CollisionType = shapeColor.R > shapeColor.B ? CollisionType.OneWay : CollisionType.Solid;
+            }
+            else
+            {
+                this.CollisionType = shapeColor.R > shapeColor.G ? CollisionType.OneWay : CollisionType.YPassable;
+            }
         }
     }
 }

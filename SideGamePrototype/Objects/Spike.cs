@@ -5,14 +5,18 @@ using System.Linq;
 
 namespace SideGamePrototype
 {
-    internal class Bullet : IEntity
+    internal class Spike : IEntity
     {
         public IRigidBody Body { get; private set; }
         public bool Dead { get; set; }
 
-        public Bullet(Vector2 pos)
+        private bool topSpike = false;
+
+        public Spike(Vector2 pos, bool topSpike = false)
         {
             this.Body = new RigidBody(pos, GetCurrentShape);
+            this.Body.IsStatic = true;
+            this.topSpike = topSpike;
         }
 
         public void Draw(SpriteBatch s)
@@ -25,7 +29,7 @@ namespace SideGamePrototype
             => R.Textures.Tiles.GetTileFromString(this.GetTileString());
 
         private string GetTileString()
-            => "5,A";
+            => this.topSpike ? "7,B" : "7,A";
 
         public void Update(float dt)
         {
@@ -37,14 +41,12 @@ namespace SideGamePrototype
                     .EntityCollisions.Where(e => e is Wizard).FirstOrDefault() as Wizard;
                 if (w != null)
                     w.Hit();
-
-                this.Dead = true;
             }
         }
 
+        public CollisionType CollisionType => GetTile().CollisionType;
+
         private Tile GetCurrentShape()
             => R.Textures.Tiles.GetTileFromString(GetTileString());
-
-        public CollisionType CollisionType => GetTile().CollisionType;
     }
 }

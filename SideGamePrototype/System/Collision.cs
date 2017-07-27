@@ -40,6 +40,21 @@ namespace SideGamePrototype
             var entities = new HashSet<IEntity>();
             IEntity e;
 
+            if (body.IsStatic)
+            {
+                Collides(body, new Point(0, 0), out e);
+                if (e != null)
+                    entities.Add(e);
+
+                var s = new CollisionResult();
+                s.AvailablePosition = targetPosition;
+                s.WasCollision = entities.Any();
+                s.StandsOnGround = false;
+                s.EntityCollisions = entities.ToList();
+
+                return s;
+            }
+
             //Vertical
             var offV = new Point(0, (int)targetPosition.Y - (int)body.Positon.Y);
 
@@ -100,7 +115,7 @@ namespace SideGamePrototype
                 }
             }
 
-            foreach (var otherEntity in this.entities.All.Where(e => e.Body != body))
+            foreach (var otherEntity in this.entities.All.Where(e => e.CollisionType == CollisionType.Solid && e.Body != body))
             {
                 if (hitRect.Intersects(otherEntity.Body.BoundingBox))
                 {
