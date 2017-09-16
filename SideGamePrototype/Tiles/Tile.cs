@@ -9,53 +9,66 @@ namespace SideGamePrototype
         None, Solid, YPassable, OneWay
     }
 
-    public class Tile
+    public interface ITile
+    {
+        string Name { get; }
+        Vector2 Size { get; }
+
+        Rectangle CollisionBox { get; }
+        CollisionType CollisionType { get; }
+
+        void Draw(SpriteBatch s, Vector2 d, SpriteEffects eff = SpriteEffects.None);
+        void DrawInTileCoordinates(SpriteBatch s, Vector2 tileCoordinates, SpriteEffects eff = SpriteEffects.None);
+    }
+
+    public class Tile : ITile
     {
         private static readonly Color DEBUG_SOLID = Color.FromNonPremultiplied(0, 0, 255, 180);
         private static readonly Color DEBUG_ONEWAY = Color.FromNonPremultiplied(255, 0, 0, 180);
         private static readonly Color DEBUG_YPASS = Color.FromNonPremultiplied(0, 255, 0, 180);
 
-        private readonly TextureInfo t;
-        private readonly Rectangle r;
+        private readonly TileSource tileSource;
+        private readonly Rectangle sourceRect;
 
         public Vector2 Size { get; private set; }
         public Rectangle CollisionBox { get; private set; }
         public CollisionType CollisionType { get; private set; }
-        public bool IsEmpty { get; private set; }
 
-        public string Name { get; set; }
+        public string Name { get; }
 
-        public Tile(TextureInfo t, Rectangle r)
+        public Tile(string name, TileSource tileSource, Rectangle sourceRect, Rectangle collisionBox, CollisionType collisionType)
         {
-            this.t = t;
-            this.r = r;
+            this.Name = name;
+            this.tileSource = tileSource;
+            this.sourceRect = sourceRect;
 
-            this.Size = new Vector2(r.Width, r.Height);
-            this.SetCollisionAttributes();
+            this.Size = new Vector2(sourceRect.Width, sourceRect.Height);
+            this.CollisionBox = collisionBox;
+            this.CollisionType = collisionType;
         }
 
         public void DrawInTileCoordinates(SpriteBatch s, Vector2 tileCoordinates, SpriteEffects eff = SpriteEffects.None)
         {
             var dest = new Rectangle(
-                   (int)tileCoordinates.X * r.Width,
-                   (int)tileCoordinates.Y * r.Height,
-                   r.Width,
-                   r.Height);
+                   (int)tileCoordinates.X * sourceRect.Width,
+                   (int)tileCoordinates.Y * sourceRect.Height,
+                   sourceRect.Width,
+                   sourceRect.Height);
             this.Draw(s, dest, eff);
         }
 
         public void Draw(SpriteBatch s, Vector2 d, SpriteEffects eff = SpriteEffects.None)
         {
-            var dest = new Rectangle((int)d.X, (int)d.Y, r.Width, r.Height);
+            var dest = new Rectangle((int)d.X, (int)d.Y, sourceRect.Width, sourceRect.Height);
             this.Draw(s, dest, eff);
         }
 
-        public void Draw(SpriteBatch s, Rectangle destination, SpriteEffects eff = SpriteEffects.None)
+        private void Draw(SpriteBatch s, Rectangle destination, SpriteEffects eff = SpriteEffects.None)
         {
             s.Draw(
-                  texture: this.t.Texture,
+                  texture: this.tileSource.Texture,
                   destinationRectangle: destination,
-                  sourceRectangle: r,
+                  sourceRectangle: sourceRect,
                   color: Color.White,
                   rotation: 0.0f,
                   origin: new Vector2(),
@@ -69,7 +82,7 @@ namespace SideGamePrototype
 
                 if (eff == SpriteEffects.FlipHorizontally)
                 {
-                    collBox = MathUtil.FlipHorizontal(collBox, this.r.Size.X);
+                    collBox = MathUtil.FlipHorizontal(collBox, this.sourceRect.Size.X);
                 }
 
                 var box = new Rectangle(
@@ -91,56 +104,6 @@ namespace SideGamePrototype
                  layerDepth: 1.0f);
             }
             //DEBUG
-        }
-
-        private void SetCollisionAttributes()
-        {
-            Color shapeColor = Color.Transparent;
-
-            int l, t, r, b;
-            l = t = r = b = (int)this.Size.X / 2;
-
-            var raw = this.t.Raw;
-            var width = this.t.Texture.Width;
-
-            var sourceRect = new Rectangle(this.r.X, this.r.Y + this.r.Height, this.r.Width, this.r.Height);
-
-            this.IsEmpty = true;
-            for (int x = 0; x < sourceRect.Width; x++)
-            {
-                for (int y = 0; y < sourceRect.Height; y++)
-                {
-                    var pixel = raw.GetPixel(sourceRect.X + x, sourceRect.Y + y, width);
-                    if (pixel.A > 0.0f)
-                    {
-                        shapeColor = pixel;
-                        l = x < l ? x : l;
-                        t = y < t ? y : t;
-                        r = x > r ? x : r;
-                        b = y > b ? y : b;
-
-                        this.IsEmpty = false;
-                    }
-                }
-            }
-
-            if (shapeColor == Color.Transparent)
-            {
-                this.CollisionType = CollisionType.None;
-                this.CollisionBox = new Rectangle();
-                return;
-            }
-
-            this.CollisionBox = new Rectangle(l, t, r - l + 1, b - t + 1);
-
-            if (shapeColor.B > shapeColor.G)
-            {
-                this.CollisionType = shapeColor.R > shapeColor.B ? CollisionType.OneWay : CollisionType.Solid;
-            }
-            else
-            {
-                this.CollisionType = shapeColor.R > shapeColor.G ? CollisionType.OneWay : CollisionType.YPassable;
-            }
         }
     }
 }

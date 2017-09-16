@@ -104,7 +104,7 @@ namespace SideGamePrototype
 
         public CollisionType CollisionType => ((DrawableState)this.currentStates.Peek()).GetTile().CollisionType;
 
-        private Tile GetCurrentShape()
+        private ITile GetCurrentShape()
             => ((DrawableState)this.currentStates.Peek()).GetTile();
     }
 
@@ -151,7 +151,7 @@ namespace SideGamePrototype
     internal class JumpingState : DrawableState
     {
         public static float Duration = 1.5f;
-        public static float Force = 5.0f;
+        public static float Force = 4.0f;
         public static float Mul => Force / Duration;
 
         private float elapsed = 0.0f;
@@ -176,7 +176,7 @@ namespace SideGamePrototype
             var body = this.entity.Body;
             body.AddForce("g", new Vector2(0, 3.5f));
             body.AddVelocityComponent("jump", new Vector2(0, -jumpforce));
-            body.AddMoveComponent(this.input, velocity: 3.0f);
+            body.AddMoveComponent(this.input, velocity: 2.0f);
 
             return base.Update(gt);
         }
@@ -324,7 +324,7 @@ namespace SideGamePrototype
             return base.Update(gt);
         }
 
-        public Tile GetTile()
+        public ITile GetTile()
             => R.Textures.Tiles.GetTileFromString(this.GetTileString());
     }
 

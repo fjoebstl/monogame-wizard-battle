@@ -25,7 +25,7 @@ namespace SideGamePrototype
             t.Draw(s, this.Body.Positon);
         }
 
-        public Tile GetTile()
+        public ITile GetTile()
             => R.Textures.Tiles.GetTileFromString(this.GetTileString());
 
         private string GetTileString()
@@ -46,7 +46,7 @@ namespace SideGamePrototype
 
         public CollisionType CollisionType => GetTile().CollisionType;
 
-        private Tile GetCurrentShape()
+        private ITile GetCurrentShape()
             => R.Textures.Tiles.GetTileFromString(GetTileString());
     }
 }

@@ -39,11 +39,11 @@ namespace SideGamePrototype
         public Rectangle BoundingBox { get; private set; } = new Rectangle();
         public bool IsStatic { get; set; } = false;
 
-        private Tile tile { get; set; }
-        private readonly Func<Tile> getCurrentTile;
+        private ITile tile { get; set; }
+        private readonly Func<ITile> getCurrentTile;
         private readonly Dictionary<string, ForceComponent> forces = new Dictionary<string, ForceComponent>();
 
-        public RigidBody(Vector2 position, Func<Tile> getCurrentTile)
+        public RigidBody(Vector2 position, Func<ITile> getCurrentTile)
         {
             this.Positon = position;
             this.getCurrentTile = getCurrentTile;
