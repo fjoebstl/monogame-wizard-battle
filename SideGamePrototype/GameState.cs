@@ -16,7 +16,7 @@
                 return;
 
             GameState.Entities.Update(dt);
-            ZoomingCamera.UpdateCamera(dt);
+            FollowCamera.UpdateCamera(dt);
             GameState.Logic.Update(dt);
         }
     }

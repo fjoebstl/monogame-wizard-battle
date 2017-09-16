@@ -42,6 +42,7 @@
     <Compile Include="GameUI.cs" />
     <Compile Include="Objects\Spike.cs" />
     <Compile Include="Objects\Bullet.cs" />
+    <Compile Include="System\Camera\FollowCamera.cs" />
     <Compile Include="Tiles\Tile.cs" />
     <Compile Include="System\Camera\Camera2d.cs" />
     <Compile Include="System\Camera\ZoomingCamera.cs" />

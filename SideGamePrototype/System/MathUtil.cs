@@ -17,5 +17,8 @@ namespace SideGamePrototype
 
         public static Rectangle FlipHorizontal(Rectangle r, int size)
            => new Rectangle(size - r.X - r.Width, r.Y, r.Width, r.Height);
+
+        public static Rectangle Translate(this Rectangle self, Rectangle r)
+            => new Rectangle(r.X + self.X, r.Y + self.Y, self.Width, self.Height);
     }
 }

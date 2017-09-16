@@ -36,11 +36,6 @@ namespace SideGamePrototype
             return texture;
         }
 
-        public static Rectangle Translate(this Rectangle self, Rectangle r)
-        {
-            return new Rectangle(r.X + self.X, r.Y + self.Y, self.Width, self.Height);
-        }
-
         public static int GetDominatComponent(this Color c)
         {
             return c.R > c.G && c.R > c.B ? 0 :
